@@ -9,6 +9,14 @@ const router = createRouter({
       meta: { hideTabbar: true, public: true },
     },
     { path: '/', component: () => import('@/views/HomeView.vue') },
+    { path: '/bills', component: () => import('@/views/BillsView.vue') },
+    { path: '/reports', component: () => import('@/views/ReportsView.vue') },
+    { path: '/me', component: () => import('@/views/MeView.vue') },
+    {
+      path: '/categories',
+      component: () => import('@/views/CategoryManageView.vue'),
+      meta: { hideTabbar: true },
+    },
     {
       path: '/record',
       component: () => import('@/views/RecordEditView.vue'),
@@ -19,8 +27,6 @@ const router = createRouter({
       component: () => import('@/views/RecordEditView.vue'),
       meta: { hideTabbar: true },
     },
-    { path: '/stats', component: () => import('@/views/StatsView.vue') },
-    { path: '/me', component: () => import('@/views/MeView.vue') },
   ],
 });
 

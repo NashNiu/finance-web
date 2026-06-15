@@ -1,66 +1,161 @@
 <template>
   <div class="home">
-    <div class="summary">
-      <van-icon name="arrow-left" class="nav" @click="changeMonth(-1)" />
-      <div class="month">{{ month }}</div>
-      <van-icon name="arrow" class="nav" @click="changeMonth(1)" />
+    <div class="qz-header">
+      <div class="topbar">
+        <span class="topbar__title">小青账</span>
+        <div class="topbar__icons">
+          <van-icon name="balance-list-o" @click="toast" />
+          <van-icon name="records-o" @click="toast" />
+        </div>
+      </div>
+
+      <div class="ov">
+        <div class="ov__label">
+          本月支出(元)
+          <van-icon name="exchange" size="13" />
+        </div>
+        <div class="ov__amount-row">
+          <span class="ov__amount">¥{{ masked(summary.expense) }}</span>
+          <van-icon
+            :name="visible ? 'eye-o' : 'closed-eye'"
+            class="ov__eye"
+            @click="visible = !visible"
+          />
+        </div>
+        <div class="ov__sub">
+          <span>本月收入 {{ masked(summary.income) }}</span>
+          <span>月结余 {{ masked(summary.balance) }}</span>
+        </div>
+        <div class="dots"><i /><i class="on" /><i /></div>
+      </div>
     </div>
-    <div class="totals">
-      <div><span>支出</span><b class="expense">{{ formatMoney(summary.expense) }}</b></div>
-      <div><span>收入</span><b class="income">{{ formatMoney(summary.income) }}</b></div>
-      <div><span>结余</span><b>{{ formatMoney(summary.balance) }}</b></div>
+
+    <van-button class="qz-cta" type="primary" block @click="router.push('/record')">
+      记一笔
+    </van-button>
+
+    <div class="qz-section">
+      <span class="qz-section__title">近3日账单</span>
+      <span class="qz-section__action">按时间</span>
     </div>
-    <RecordList :records="records" @select="edit" />
-    <van-button class="fab" type="primary" icon="plus" round @click="router.push('/record')" />
+
+    <div v-for="g in recentDays" :key="g.date" class="group">
+      <div class="qz-day">
+        <span>{{ formatDayLabel(g.date) }}</span>
+        <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+      </div>
+      <RecordItem v-for="r in g.records" :key="r.id" :record="r" @select="edit" />
+    </div>
+    <van-empty v-if="recentDays.length === 0" description="近3日暂无账单" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import RecordList from '@/components/RecordList.vue';
+import { showToast } from 'vant';
+import RecordItem from '@/components/RecordItem.vue';
 import { listRecords } from '@/api/records';
 import { getSummary } from '@/api/stats';
-import { formatMoney } from '@/utils/format';
+import { formatMoney, formatDayLabel, groupByDay } from '@/utils/format';
 import type { FinanceRecord, Summary } from '@/types';
 
 const router = useRouter();
 const now = new Date();
-const month = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
-const records = ref<FinanceRecord[]>([]);
+const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 const summary = ref<Summary>({ income: 0, expense: 0, balance: 0 });
+const recentDays = ref<{ date: string; records: FinanceRecord[] }[]>([]);
+const visible = ref(true);
 
-async function load() {
-  const [list, sum] = await Promise.all([
-    listRecords({ month: month.value, pageSize: 200 }),
-    getSummary(month.value),
-  ]);
-  records.value = list.items;
-  summary.value = sum;
-}
-
-function changeMonth(delta: number) {
-  const [y, m] = month.value.split('-').map(Number);
-  const d = new Date(y, m - 1 + delta, 1);
-  month.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-  load();
-}
+const masked = (v: number) => (visible.value ? formatMoney(v) : '****');
+const dayExpense = (rs: FinanceRecord[]) =>
+  rs.filter((r) => r.type === 'EXPENSE').reduce((s, r) => s + Number(r.amount), 0);
+const toast = () => showToast('敬请期待');
 
 function edit(r: FinanceRecord) {
   router.push(`/record/${r.id}`);
+}
+
+async function load() {
+  const [sum, list] = await Promise.all([
+    getSummary(month),
+    listRecords({ pageSize: 50 }),
+  ]);
+  summary.value = sum;
+  recentDays.value = groupByDay(list.items).slice(0, 3);
 }
 
 onMounted(load);
 </script>
 
 <style scoped>
-.summary { display: flex; align-items: center; justify-content: center; gap: 24px; padding: 16px; background: #07c160; color: #fff; }
-.summary .month { font-size: 18px; font-weight: 600; }
-.nav { font-size: 18px; }
-.totals { display: flex; justify-content: space-around; padding: 16px; background: #07c160; color: #fff; }
-.totals span { display: block; font-size: 12px; opacity: 0.85; }
-.totals b { font-size: 18px; }
-.income { color: #fff; }
-.expense { color: #fff; }
-.fab { position: fixed; right: 16px; bottom: 70px; width: 52px; height: 52px; }
+.topbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+}
+.topbar__title {
+  font-size: 17px;
+  font-weight: 600;
+}
+.topbar__icons {
+  position: absolute;
+  right: 0;
+  display: flex;
+  gap: 16px;
+  font-size: 20px;
+}
+.ov {
+  padding: 16px 4px 4px;
+}
+.ov__label {
+  font-size: 14px;
+  color: #3c4a38;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ov__amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 14px;
+}
+.ov__amount {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+.ov__eye {
+  font-size: 20px;
+  color: #3c4a38;
+}
+.ov__sub {
+  display: flex;
+  gap: 48px;
+  font-size: 14px;
+  color: #3c4a38;
+}
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+.dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+}
+.dots i.on {
+  background: rgba(255, 255, 255, 0.95);
+  width: 16px;
+  border-radius: 3px;
+}
+.group {
+  margin-top: 4px;
+}
 </style>

@@ -1,0 +1,133 @@
+/* 青账 design system — sage-green theme matching the 小青账 app. */
+
+:root {
+  /* Brand */
+  --qz-green: #9dbf8d;          /* sage green: header, buttons, active states */
+  --qz-green-deep: #8ab079;     /* pressed / emphasis */
+  --qz-green-soft: #e8f1e3;     /* selected tile bg */
+  --qz-expense: #e75a54;        /* expense amounts (red) */
+  --qz-income: #4fa570;         /* income amounts (green) */
+
+  /* Neutrals */
+  --qz-bg: #f4f5f4;
+  --qz-card: #ffffff;
+  --qz-text: #1f1f1f;
+  --qz-text-sub: #9a9c9f;
+  --qz-line: #f0f1f2;
+  --qz-tile: #f4f5f6;           /* icon tile background */
+  --qz-radius: 14px;
+
+  /* Vant overrides */
+  --van-primary-color: #9dbf8d;
+  --van-tabbar-item-active-color: #6f9a5e;
+  --van-button-primary-background: #9dbf8d;
+  --van-button-primary-border-color: #9dbf8d;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--qz-bg);
+  color: var(--qz-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue',
+    Helvetica, Arial, sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+  padding-bottom: 50px; /* room for the fixed tabbar */
+}
+
+/* Sage-green page header (rounded bottom). */
+.qz-header {
+  background: var(--qz-green);
+  color: var(--qz-text);
+  padding: 14px 18px 22px;
+  border-bottom-left-radius: 22px;
+  border-bottom-right-radius: 22px;
+}
+
+.qz-header__title {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+/* White rounded card. */
+.qz-card {
+  background: var(--qz-card);
+  border-radius: var(--qz-radius);
+  margin: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* A card that overlaps the green header above it. */
+.qz-card--overlap {
+  margin-top: -16px;
+}
+
+.qz-amount-expense {
+  color: var(--qz-expense);
+}
+.qz-amount-income {
+  color: var(--qz-income);
+}
+
+/* Section title + right-aligned action (e.g. 近3日账单 / 按时间). */
+.qz-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 6px;
+}
+.qz-section__title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.qz-section__action {
+  font-size: 13px;
+  color: var(--qz-text-sub);
+  background: #eef0ee;
+  border-radius: 12px;
+  padding: 3px 12px;
+}
+
+/* Day group header inside a record list. */
+.qz-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 6px;
+  color: var(--qz-text-sub);
+  font-size: 13px;
+}
+
+/* Large rounded primary button (记一笔). */
+.qz-cta {
+  margin: 14px 12px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Soft pill toggle in a header (报表 / 日历). */
+.qz-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  padding: 3px;
+  gap: 2px;
+}
+.qz-toggle__item {
+  padding: 4px 16px;
+  border-radius: 14px;
+  font-size: 15px;
+  color: #3a4a36;
+}
+.qz-toggle__item--active {
+  background: #3a4332;
+  color: #fff;
+}
