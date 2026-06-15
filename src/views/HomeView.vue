@@ -108,7 +108,7 @@ onMounted(load);
   font-size: 20px;
 }
 .ov {
-  padding: 16px 4px 4px;
+  padding: 16px 0 4px;
 }
 .ov__label {
   font-size: 14px;
@@ -134,7 +134,8 @@ onMounted(load);
 }
 .ov__sub {
   display: flex;
-  gap: 48px;
+  gap: 40px;
+  flex-wrap: wrap;
   font-size: 14px;
   color: #3c4a38;
 }

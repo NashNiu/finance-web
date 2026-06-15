@@ -24,9 +24,18 @@
   --van-button-primary-border-color: #9dbf8d;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* no horizontal scroll / edge whitespace */
   background: var(--qz-bg);
   color: var(--qz-text);
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue',
@@ -35,6 +44,9 @@ body {
 
 #app {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   padding-bottom: 50px; /* room for the fixed tabbar */
 }
 
