@@ -8,6 +8,7 @@ export const createCategory = (data: {
   name: string;
   icon: string;
   type: RecordType;
+  parentId?: number | null;
 }) => http.post<unknown, Category>('/categories', data);
 
 export const deleteCategory = (id: number) =>

@@ -8,6 +8,7 @@ export interface User {
 export interface Category {
   id: number;
   userId: number | null;
+  parentId: number | null; // null = first-level (一级分类); set = subcategory
   name: string;
   icon: string;
   type: RecordType;
