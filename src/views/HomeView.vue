@@ -3,16 +3,16 @@
     <div class="qz-header">
       <div class="topbar">
         <span class="topbar__title">小青账</span>
-        <div class="topbar__icons">
+        <!-- <div class="topbar__icons">
           <van-icon name="balance-list-o" @click="toast" />
           <van-icon name="records-o" @click="toast" />
-        </div>
+        </div> -->
       </div>
 
       <div class="ov">
         <div class="ov__label">
           本月支出(元)
-          <van-icon name="exchange" size="13" />
+          <!-- <van-icon name="exchange" size="13" /> -->
         </div>
         <div class="ov__amount-row">
           <span class="ov__amount">¥{{ masked(summary.expense) }}</span>
@@ -26,7 +26,7 @@
           <span>本月收入 {{ masked(summary.income) }}</span>
           <span>月结余 {{ masked(summary.balance) }}</span>
         </div>
-        <div class="dots"><i /><i class="on" /><i /></div>
+        <!-- <div class="dots"><i /><i class="on" /><i /></div> -->
       </div>
     </div>
 
