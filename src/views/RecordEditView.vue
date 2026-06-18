@@ -70,7 +70,7 @@ import AddCategoryForm from '@/components/AddCategoryForm.vue';
 import AmountKeypad from '@/components/AmountKeypad.vue';
 import { useCategoryStore } from '@/stores/categories';
 import { deleteCategory } from '@/api/categories';
-import { createRecord, updateRecord, deleteRecord, listRecords } from '@/api/records';
+import { createRecord, updateRecord, deleteRecord, getRecord } from '@/api/records';
 import type { Category, RecordType } from '@/types';
 
 const route = useRoute();
@@ -192,8 +192,7 @@ async function onDelete() {
 onMounted(async () => {
   await catStore.load();
   if (isEdit.value) {
-    const list = await listRecords({ pageSize: 200 });
-    const rec = list.items.find((r) => r.id === id.value);
+    const rec = await getRecord(id.value!);
     if (rec) {
       type.value = rec.type;
       categoryId.value = rec.categoryId;
