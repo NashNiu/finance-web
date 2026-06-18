@@ -150,7 +150,7 @@ function dayExpense(rs: FinanceRecord[]): number {
 }
 
 function edit(r: FinanceRecord) {
-  recordEdit.open(r.id);
+  recordEdit.openDetail(r);
 }
 
 // Load data

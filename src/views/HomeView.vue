@@ -73,7 +73,7 @@ const dayExpense = (rs: FinanceRecord[]) =>
 const toast = () => showToast('敬请期待');
 
 function edit(r: FinanceRecord) {
-  recordEdit.open(r.id);
+  recordEdit.openDetail(r);
 }
 
 async function load() {

@@ -204,7 +204,7 @@
           v-for="r in selectedDayRecords"
           :key="r.id"
           :record="r"
-          @select="recordEdit.open(r.id)"
+          @select="recordEdit.openDetail(r)"
         />
       </div>
     </template>
