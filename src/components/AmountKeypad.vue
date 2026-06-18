@@ -1,16 +1,13 @@
 <template>
-  <div>
-    <div class="display">{{ modelValue || '0.00' }}</div>
-    <van-number-keyboard
-      :show="true"
-      theme="custom"
-      extra-key="."
-      close-button-text="完成"
-      @input="onInput"
-      @delete="onDelete"
-      @close="$emit('done')"
-    />
-  </div>
+  <van-number-keyboard
+    :show="true"
+    theme="custom"
+    extra-key="."
+    close-button-text="完成"
+    @input="onInput"
+    @delete="onDelete"
+    @close="$emit('done')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -30,5 +27,8 @@ function onDelete() {
 </script>
 
 <style scoped>
-.display { text-align: right; font-size: 32px; padding: 16px; font-weight: 600; }
+/* keyboard sits inside the input dock (not fixed to the viewport) */
+:deep(.van-number-keyboard) {
+  position: static;
+}
 </style>

@@ -1,10 +1,12 @@
 <template>
-  <RecordEditor
-    :record-id="routeId"
-    @close="goBack"
-    @saved="goBack"
-    @deleted="goBack"
-  />
+  <div class="record-page">
+    <RecordEditor
+      :record-id="routeId"
+      @close="goBack"
+      @saved="goBack"
+      @deleted="goBack"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -20,3 +22,9 @@ function goBack() {
   router.back();
 }
 </script>
+
+<style scoped>
+.record-page {
+  height: 100vh;
+}
+</style>
