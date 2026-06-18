@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <van-button class="qz-cta" type="primary" block @click="router.push('/record')">
+    <van-button class="qz-cta" type="primary" block @click="recordEdit.openNew()">
       记一笔
     </van-button>
 
@@ -51,16 +51,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, watch, onMounted } from 'vue';
 import { showToast } from 'vant';
 import RecordItem from '@/components/RecordItem.vue';
 import { listRecords } from '@/api/records';
 import { getSummary } from '@/api/stats';
+import { useRecordEditStore } from '@/stores/recordEdit';
 import { formatMoney, formatDayLabel, groupByDay } from '@/utils/format';
 import type { FinanceRecord, Summary } from '@/types';
 
-const router = useRouter();
+const recordEdit = useRecordEditStore();
 const now = new Date();
 const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 const summary = ref<Summary>({ income: 0, expense: 0, balance: 0 });
@@ -73,7 +73,7 @@ const dayExpense = (rs: FinanceRecord[]) =>
 const toast = () => showToast('敬请期待');
 
 function edit(r: FinanceRecord) {
-  router.push(`/record/${r.id}`);
+  recordEdit.open(r.id);
 }
 
 async function load() {
@@ -86,6 +86,7 @@ async function load() {
 }
 
 onMounted(load);
+watch(() => recordEdit.version, load);
 </script>
 
 <style scoped>

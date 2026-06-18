@@ -195,7 +195,7 @@
           {{ formatDayLabel(selectedDate) }}账单
           <span class="qz-amount-expense"> 支出¥{{ formatMoney(selectedDayExpense) }}</span>
         </span>
-        <span class="qz-section__action" @click="router.push('/record')">记一笔</span>
+        <span class="qz-section__action" @click="recordEdit.openNew()">记一笔</span>
       </div>
 
       <div class="day-records-wrap">
@@ -204,7 +204,7 @@
           v-for="r in selectedDayRecords"
           :key="r.id"
           :record="r"
-          @select="router.push(`/record/${r.id}`)"
+          @select="recordEdit.open(r.id)"
         />
       </div>
     </template>
@@ -224,10 +224,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { showToast } from 'vant';
 
 import { listRecords } from '@/api/records';
+import { useRecordEditStore } from '@/stores/recordEdit';
 import {
   sumMonth,
   categoryBreakdown,
@@ -242,8 +242,8 @@ import type { FinanceRecord, RecordType } from '@/types';
 import CategoryDonut from '@/components/CategoryDonut.vue';
 import RecordItem from '@/components/RecordItem.vue';
 
-// ── router ──────────────────────────────────────────────────────────────────
-const router = useRouter();
+// ── record editor popup ──────────────────────────────────────────────────────
+const recordEdit = useRecordEditStore();
 
 // ── state ───────────────────────────────────────────────────────────────────
 const mode = ref<'report' | 'calendar'>('report');
@@ -287,6 +287,7 @@ async function loadRecords() {
 
 onMounted(loadRecords);
 watch(month, loadRecords);
+watch(() => recordEdit.version, loadRecords);
 
 // ── aggregates ───────────────────────────────────────────────────────────────
 const summary = computed(() => sumMonth(records.value));

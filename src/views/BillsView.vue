@@ -102,17 +102,17 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { showToast } from 'vant';
 import DailyBar from '@/components/DailyBar.vue';
 import RecordItem from '@/components/RecordItem.vue';
 import { listRecords } from '@/api/records';
+import { useRecordEditStore } from '@/stores/recordEdit';
 import { formatMoney, formatDayLabel, groupByDay } from '@/utils/format';
 import { sumMonth, dailySpend, avgDailyExpense } from '@/utils/aggregate';
 import type { FinanceRecord } from '@/types';
 import type { DaySpend, MonthSummary } from '@/utils/aggregate';
 
-const router = useRouter();
+const recordEdit = useRecordEditStore();
 
 // Current month state
 const now = new Date();
@@ -150,7 +150,7 @@ function dayExpense(rs: FinanceRecord[]): number {
 }
 
 function edit(r: FinanceRecord) {
-  router.push(`/record/${r.id}`);
+  recordEdit.open(r.id);
 }
 
 // Load data
@@ -170,6 +170,7 @@ function onPickerConfirm({ selectedValues }: { selectedValues: string[] }) {
 }
 
 watch(month, load);
+watch(() => recordEdit.version, load);
 onMounted(load);
 </script>
 
