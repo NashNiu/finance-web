@@ -3,16 +3,20 @@
     <van-grid-item
       v-for="c in filtered"
       :key="c.id"
-      :icon="c.icon"
       :text="c.name"
       :class="{ active: c.id === modelValue }"
       @click="$emit('update:modelValue', c.id)"
-    />
+    >
+      <template #icon>
+        <CategoryIcon :icon="c.icon" :size="26" />
+      </template>
+    </van-grid-item>
   </van-grid>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import type { Category, RecordType } from '@/types';
 
 const props = defineProps<{

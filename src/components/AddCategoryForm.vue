@@ -15,7 +15,7 @@
         :class="{ 'chip--active': p.id === selectedParentId }"
         @click="selectedParentId = p.id"
       >
-        <van-icon :name="p.icon" size="15" />
+        <CategoryIcon :icon="p.icon" :size="15" />
         {{ p.name }}
       </span>
     </div>
@@ -39,7 +39,7 @@
         :class="{ 'icon-choice--active': ic === chosenIcon }"
         @click="chosenIcon = ic"
       >
-        <van-icon :name="ic" size="22" color="#4a4c4f" />
+        <CategoryIcon :icon="ic" :size="22" />
       </div>
     </div>
 
@@ -58,8 +58,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { showToast } from 'vant';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { createCategory } from '@/api/categories';
 import { useCategoryStore } from '@/stores/categories';
+import { EMOJI_CHOICES } from '@/utils/icon';
 import type { Category, RecordType } from '@/types';
 
 const props = defineProps<{
@@ -78,35 +80,10 @@ const selectedParentId = ref<number | null>(
   props.parentId ?? props.firstLevels[0]?.id ?? null,
 );
 const name = ref('');
-const chosenIcon = ref('food-o');
+const chosenIcon = ref(EMOJI_CHOICES[0]);
 const saving = ref(false);
 
-const iconChoices = [
-  'food-o',
-  'shopping-cart-o',
-  'gift-o',
-  'smile-o',
-  'medal-o',
-  'flower-o',
-  'cash-back-record',
-  'shop-o',
-  'home-o',
-  'logistics',
-  'music-o',
-  'phone-o',
-  'friends-o',
-  'bookmark-o',
-  'gem-o',
-  'fire-o',
-  'video-o',
-  'coupon-o',
-  'gold-coin-o',
-  'balance-o',
-  'bag-o',
-  'todo-list-o',
-  'plus',
-  'ellipsis',
-];
+const iconChoices = EMOJI_CHOICES;
 
 async function onSave() {
   if (!name.value.trim()) return showToast('请输入分类名称');

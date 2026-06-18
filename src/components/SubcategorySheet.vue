@@ -23,7 +23,7 @@
           @click="$emit('select', c.id)"
         >
           <div class="sub-tile__icon">
-            <van-icon :name="c.icon" size="24" color="#4a4c4f" />
+            <CategoryIcon :icon="c.icon" :size="24" />
           </div>
           <span class="sub-tile__name">{{ c.name }}</span>
           <van-icon
@@ -41,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import type { Category } from '@/types';
 
 defineProps<{

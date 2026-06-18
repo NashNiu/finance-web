@@ -20,7 +20,7 @@
           @click="openManage(cat)"
         >
           <div class="cat-tile__icon">
-            <van-icon :name="cat.icon" size="24" color="#4a4c4f" />
+            <CategoryIcon :icon="cat.icon" :size="24" />
           </div>
           <span class="cat-tile__name">{{ cat.name }}</span>
           <span class="cat-tile__count">{{ catStore.childrenOf(cat.id).length }}</span>
@@ -85,7 +85,7 @@
             :class="{ 'icon-choice--active': firstIcon === ic }"
             @click="firstIcon = ic"
           >
-            <van-icon :name="ic" size="22" color="#4a4c4f" />
+            <CategoryIcon :icon="ic" :size="22" />
           </div>
         </div>
       </div>
@@ -99,8 +99,10 @@ import { useRouter } from 'vue-router';
 import { showConfirmDialog, showToast } from 'vant';
 import SubcategorySheet from '@/components/SubcategorySheet.vue';
 import AddCategoryForm from '@/components/AddCategoryForm.vue';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { useCategoryStore } from '@/stores/categories';
 import { createCategory, deleteCategory } from '@/api/categories';
+import { EMOJI_CHOICES } from '@/utils/icon';
 import type { Category, RecordType } from '@/types';
 
 const router = useRouter();
@@ -123,26 +125,9 @@ const addParentId = ref<number | null>(null);
 // add first-level
 const showAddFirst = ref(false);
 const firstName = ref('');
-const firstIcon = ref('food-o');
+const firstIcon = ref(EMOJI_CHOICES[0]);
 
-const iconChoices = [
-  'food-o',
-  'shopping-cart-o',
-  'gift-o',
-  'smile-o',
-  'medal-o',
-  'flower-o',
-  'cash-back-record',
-  'shop-o',
-  'home-o',
-  'logistics',
-  'music-o',
-  'phone-o',
-  'friends-o',
-  'bookmark-o',
-  'gem-o',
-  'fire-o',
-];
+const iconChoices = EMOJI_CHOICES;
 
 function openManage(cat: Category) {
   managedParent.value = cat;
