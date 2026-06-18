@@ -1,7 +1,7 @@
 <template>
   <div class="ri" @click="$emit('select', record)">
     <div class="ri__icon">
-      <van-icon :name="record.category?.icon || 'records'" />
+      <CategoryIcon :icon="record.category?.icon" :size="22" />
     </div>
     <div class="ri__main">
       <div class="ri__title">{{ recordTitle(record) }}</div>
@@ -17,6 +17,7 @@
 </template>
 
 <script setup lang="ts">
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { formatMoney, formatTime, recordTitle } from '@/utils/format';
 import type { FinanceRecord } from '@/types';
 
