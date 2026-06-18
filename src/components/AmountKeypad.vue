@@ -1,13 +1,15 @@
 <template>
-  <van-number-keyboard
-    :show="true"
-    theme="custom"
-    extra-key="."
-    close-button-text="完成"
-    @input="onInput"
-    @delete="onDelete"
-    @close="$emit('done')"
-  />
+  <div class="keypad">
+    <van-number-keyboard
+      :show="true"
+      theme="custom"
+      extra-key="."
+      close-button-text="完成"
+      @input="onInput"
+      @delete="onDelete"
+      @close="$emit('done')"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -28,7 +30,7 @@ function onDelete() {
 
 <style scoped>
 /* keyboard sits inside the input dock (not fixed to the viewport) */
-:deep(.van-number-keyboard) {
+.keypad :deep(.van-number-keyboard) {
   position: static;
 }
 </style>
