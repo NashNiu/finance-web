@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <div class="display">{{ modelValue || '0.00' }}</div>
+  <div class="keypad">
     <van-number-keyboard
       :show="true"
       theme="custom"
@@ -30,5 +29,8 @@ function onDelete() {
 </script>
 
 <style scoped>
-.display { text-align: right; font-size: 32px; padding: 16px; font-weight: 600; }
+/* keyboard sits inside the input dock (not fixed to the viewport) */
+.keypad :deep(.van-number-keyboard) {
+  position: static;
+}
 </style>

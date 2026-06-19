@@ -20,6 +20,9 @@ export interface RecordPayload {
 export const listRecords = (q: RecordQuery) =>
   http.get<unknown, Paginated<FinanceRecord>>('/records', { params: q });
 
+export const getRecord = (id: number) =>
+  http.get<unknown, FinanceRecord>(`/records/${id}`);
+
 export const createRecord = (data: RecordPayload) =>
   http.post<unknown, FinanceRecord>('/records', data);
 
