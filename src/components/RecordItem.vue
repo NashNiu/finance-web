@@ -1,5 +1,11 @@
 <template>
-  <van-swipe-cell ref="cellRef" :name="record.id" @open="onOpen" @close="onClose">
+  <van-swipe-cell
+    ref="cellRef"
+    :name="record.id"
+    :class="{ 'swipe-cell--open': openSwipeId === record.id }"
+    @open="onOpen"
+    @close="onClose"
+  >
     <!-- the record row -->
     <div class="ri" @click="onRowClick">
       <div class="ri__icon">
