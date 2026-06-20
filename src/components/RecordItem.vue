@@ -1,7 +1,7 @@
 <template>
   <van-swipe-cell ref="cellRef" :name="record.id" @open="onOpen" @close="onClose">
     <!-- the record row -->
-    <div class="ri" @click="$emit('select', record)">
+    <div class="ri" @click="onRowClick">
       <div class="ri__icon">
         <CategoryIcon :icon="record.category?.icon" :size="22" />
       </div>
@@ -35,30 +35,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { showConfirmDialog, showToast, type SwipeCellInstance } from 'vant';
 import CategoryIcon from '@/components/CategoryIcon.vue';
 import { deleteRecord } from '@/api/records';
 import { useRecordEditStore } from '@/stores/recordEdit';
-import { registerOpen, clearCurrent } from '@/utils/swipeRegistry';
+import { openSwipeId, setOpen, clearOpen, closeOpen } from '@/utils/swipeRegistry';
 import { formatMoney, formatTime, recordTitle } from '@/utils/format';
 import type { FinanceRecord } from '@/types';
 
 const props = defineProps<{ record: FinanceRecord }>();
-defineEmits<{ select: [record: FinanceRecord] }>();
+const emit = defineEmits<{ select: [record: FinanceRecord] }>();
 
 const recordEdit = useRecordEditStore();
 const cellRef = ref<SwipeCellInstance>();
 
 function onOpen({ position }: { position: 'left' | 'right' | 'cell' | 'outside' }) {
-  registerOpen(cellRef.value ?? null);
+  setOpen(props.record.id);
   if (position === 'left') {
     // 监听到反方向滑动，暂不做操作
   }
 }
 
 function onClose() {
-  clearCurrent(cellRef.value ?? null);
+  clearOpen(props.record.id);
+}
+
+// close my own cell when another row opens / the open row is dismissed
+watch(openSwipeId, (id) => {
+  if (id !== props.record.id) cellRef.value?.close('outside');
+});
+
+// If a row is open, the first tap only collapses it (no detail). A second tap
+// (nothing open) opens the record.
+function onRowClick() {
+  if (closeOpen()) return;
+  emit('select', props.record);
 }
 
 function onEdit() {
