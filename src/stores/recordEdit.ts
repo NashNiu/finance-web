@@ -25,6 +25,12 @@ export const useRecordEditStore = defineStore('recordEdit', () => {
     mode.value = 'edit';
     show.value = true;
   }
+  function openEdit(r: FinanceRecord) {
+    record.value = r;
+    recordId.value = r.id;
+    mode.value = 'edit';
+    show.value = true;
+  }
   function startEdit() {
     mode.value = 'edit';
   }
@@ -43,6 +49,7 @@ export const useRecordEditStore = defineStore('recordEdit', () => {
     version,
     openDetail,
     openNew,
+    openEdit,
     startEdit,
     close,
     notifyChanged,
