@@ -19,13 +19,17 @@
 
     <!-- swipe-left reveals edit / delete -->
     <template #right>
-      <div class="swipe-act swipe-act--edit" @click="onEdit">编辑</div>
-      <div class="swipe-act swipe-act--del" @click="onDelete">删除</div>
+      <div class="swipe-actions">
+        <div class="swipe-act swipe-act--edit" @click="onEdit">编辑</div>
+        <div class="swipe-act swipe-act--del" @click="onDelete">删除</div>
+      </div>
     </template>
 
     <!-- opposite swipe: listened, no action yet -->
     <template #left>
-      <div class="swipe-act swipe-act--reserved" @click="cellRef?.close('cell')">迁移</div>
+      <div class="swipe-actions">
+        <div class="swipe-act swipe-act--reserved" @click="cellRef?.close('cell')">迁移</div>
+      </div>
     </template>
   </van-swipe-cell>
 </template>
@@ -121,6 +125,10 @@ async function onDelete() {
 }
 
 /* swipe actions */
+.swipe-actions {
+  display: flex;
+  height: 100%;
+}
 .swipe-act {
   height: 100%;
   display: flex;
