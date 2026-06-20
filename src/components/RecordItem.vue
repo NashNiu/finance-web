@@ -1,7 +1,7 @@
 <template>
   <van-swipe-cell ref="cellRef" :name="record.id" @open="onOpen" @close="onClose">
     <!-- the record row -->
-    <div class="ri" @click="onRowClick">
+    <div class="ri" @click="$emit('select', record)">
       <div class="ri__icon">
         <CategoryIcon :icon="record.category?.icon" :size="22" />
       </div>
@@ -40,12 +40,12 @@ import { showConfirmDialog, showToast, type SwipeCellInstance } from 'vant';
 import CategoryIcon from '@/components/CategoryIcon.vue';
 import { deleteRecord } from '@/api/records';
 import { useRecordEditStore } from '@/stores/recordEdit';
-import { registerOpen, closeCurrent, clearIf } from '@/utils/swipeRegistry';
+import { registerOpen, clearCurrent } from '@/utils/swipeRegistry';
 import { formatMoney, formatTime, recordTitle } from '@/utils/format';
 import type { FinanceRecord } from '@/types';
 
 const props = defineProps<{ record: FinanceRecord }>();
-const emit = defineEmits<{ select: [record: FinanceRecord] }>();
+defineEmits<{ select: [record: FinanceRecord] }>();
 
 const recordEdit = useRecordEditStore();
 const cellRef = ref<SwipeCellInstance>();
@@ -58,14 +58,7 @@ function onOpen({ position }: { position: 'left' | 'right' | 'cell' | 'outside' 
 }
 
 function onClose() {
-  clearIf(cellRef.value ?? null);
-}
-
-// Tapping a row first collapses any open row (and swallows the tap); only when
-// nothing is open does the tap open the record detail.
-function onRowClick() {
-  if (closeCurrent()) return;
-  emit('select', props.record);
+  clearCurrent(cellRef.value ?? null);
 }
 
 function onEdit() {
@@ -74,15 +67,16 @@ function onEdit() {
 }
 
 async function onDelete() {
+  // collapse first so the capture interceptor is removed before the confirm
+  // dialog opens (otherwise it would swallow the dialog's confirm tap)
+  cellRef.value?.close('cell');
   try {
     await showConfirmDialog({ title: '删除', message: '确定删除这条记录？' });
   } catch {
-    cellRef.value?.close('cell');
     return;
   }
   await deleteRecord(props.record.id);
   showToast('已删除');
-  cellRef.value?.close('cell');
   recordEdit.notifyChanged();
 }
 </script>
