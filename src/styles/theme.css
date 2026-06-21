@@ -118,11 +118,20 @@ body {
 
 /* Large rounded primary button (记一笔). */
 .qz-cta {
+  /* full width minus the side margins, so it doesn't overflow (which clipped
+     the right rounded corner) nor shrink to the text width */
+  width: calc(100% - 24px);
   margin: 14px 12px;
   height: 52px;
   border-radius: 16px;
   font-size: 18px;
   font-weight: 600;
+  background: var(--qz-green-deep);
+  border-color: var(--qz-green-deep);
+  color: #fff;
+}
+.qz-cta .van-button__text {
+  color: #fff;
 }
 
 /* Soft pill toggle in a header (报表 / 日历). */
