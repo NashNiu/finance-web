@@ -13,7 +13,7 @@
       </div>
       <div class="ri__main">
         <div class="ri__title">{{ recordTitle(record) }}</div>
-        <div class="ri__time">{{ formatTime(record.createdAt) }}</div>
+        <div class="ri__time">{{ formatTime(record.recordDate) }}</div>
       </div>
       <div class="ri__right">
         <div :class="record.type === 'INCOME' ? 'qz-amount-income' : 'qz-amount-expense'">

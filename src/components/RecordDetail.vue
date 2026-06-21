@@ -26,8 +26,8 @@
         </template>
       </van-cell>
       <van-cell title="类型" :value="record.type === 'INCOME' ? '收入' : '支出'" />
-      <van-cell title="日期" :value="record.recordDate.slice(0, 10)" />
-      <van-cell title="时间" :value="formatTime(record.createdAt)" />
+      <van-cell title="日期" :value="toDateKey(record.recordDate)" />
+      <van-cell title="时间" :value="formatTime(record.recordDate)" />
       <van-cell title="备注" :value="record.note || '无'" />
       <van-cell title="账本" value="个人" />
     </van-cell-group>
@@ -38,7 +38,7 @@
 import { showConfirmDialog, showToast } from 'vant';
 import CategoryIcon from '@/components/CategoryIcon.vue';
 import { deleteRecord } from '@/api/records';
-import { formatMoney, formatTime } from '@/utils/format';
+import { formatMoney, formatTime, toDateKey } from '@/utils/format';
 import type { FinanceRecord } from '@/types';
 
 const props = defineProps<{ record: FinanceRecord }>();

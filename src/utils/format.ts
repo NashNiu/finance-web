@@ -10,7 +10,8 @@ export function formatMoney(value: number | string): string {
 
 // "2026-06-15T..." or Date -> "2026-06-15" (local date part of ISO)
 export function toDateKey(input: string): string {
-  return new Date(input).toISOString().slice(0, 10);
+  const d = new Date(input);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 // ISO timestamp -> "HH:MM" (local time), used for the record-row time label.

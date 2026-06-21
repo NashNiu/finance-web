@@ -42,9 +42,9 @@
           :border="false"
           placeholder="点此添加备注"
         />
-        <div class="dock__date" @click="showDate = true">
+        <div class="dock__date" @click="openDateTime">
           <van-icon name="calendar-o" size="15" />
-          {{ dateLabel }}
+          {{ dateLabel }} {{ recordTime }}
         </div>
         <div
           class="dock__amount"
@@ -58,11 +58,15 @@
     </div>
 
     <van-popup v-model:show="showDate" position="bottom" teleport="body">
-      <van-date-picker
-        :model-value="datePickerValue"
-        @confirm="onDateConfirm"
+      <van-picker-group
+        :tabs="['日期', '时间']"
+        title="选择日期时间"
+        @confirm="onDateTimeConfirm"
         @cancel="showDate = false"
-      />
+      >
+        <van-date-picker v-model="dpDate" />
+        <van-time-picker v-model="dpTime" />
+      </van-picker-group>
     </van-popup>
 
     <SubcategorySheet
@@ -110,16 +114,34 @@ const categoryId = ref<number | null>(null);
 const selectedFirstLevelId = ref<number | null>(null);
 const amount = ref('');
 const note = ref('');
-const today = new Date();
-const recordDate = ref(
-  `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`,
-);
+
+const pad = (n: number) => String(n).padStart(2, '0');
+function localDate(d: Date) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function localTime(d: Date) {
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+const now = new Date();
+const recordDate = ref(localDate(now)); // YYYY-MM-DD
+const recordTime = ref(localTime(now)); // HH:mm
+
+// picker-group bindings (arrays), synced when the popup opens
 const showDate = ref(false);
-const datePickerValue = computed(() => recordDate.value.split('-'));
+const dpDate = ref<string[]>(recordDate.value.split('-'));
+const dpTime = ref<string[]>(recordTime.value.split(':'));
+
 const dateLabel = computed(() => {
   const [, m, d] = recordDate.value.split('-');
   return `${Number(m)}月${Number(d)}日`;
 });
+
+function openDateTime() {
+  dpDate.value = recordDate.value.split('-');
+  dpTime.value = recordTime.value.split(':');
+  showDate.value = true;
+}
 
 const showSheet = ref(false);
 const sheetParent = ref<Category | null>(null);
@@ -185,8 +207,9 @@ async function onDeleteSub(subId: number) {
   }
 }
 
-function onDateConfirm(e: { selectedValues: string[] }) {
-  recordDate.value = e.selectedValues.join('-');
+function onDateTimeConfirm() {
+  recordDate.value = dpDate.value.join('-');
+  recordTime.value = dpTime.value.join(':');
   showDate.value = false;
 }
 
@@ -199,7 +222,7 @@ async function onSave() {
     type: type.value,
     amount: amt,
     note: note.value,
-    recordDate: recordDate.value,
+    recordDate: `${recordDate.value}T${recordTime.value}:00`,
   };
   if (isEdit.value) await updateRecord(props.recordId!, payload);
   else await createRecord(payload);
@@ -225,7 +248,9 @@ async function loadRecord() {
   selectedFirstLevelId.value = cat?.parentId ?? rec.categoryId;
   amount.value = String(Number(rec.amount));
   note.value = rec.note || '';
-  recordDate.value = rec.recordDate.slice(0, 10);
+  const d = new Date(rec.recordDate);
+  recordDate.value = localDate(d);
+  recordTime.value = localTime(d);
 }
 
 onMounted(loadRecord);
@@ -237,6 +262,9 @@ watch(
     selectedFirstLevelId.value = null;
     amount.value = '';
     note.value = '';
+    const n = new Date();
+    recordDate.value = localDate(n);
+    recordTime.value = localTime(n);
     loadRecord();
   },
 );
