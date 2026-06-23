@@ -1,6 +1,7 @@
 <template>
   <div class="login">
-    <h2 class="title">{{ isLogin ? '登录' : '注册' }}青账</h2>
+    <img class="brand-logo" src="/logo-mark.svg" alt="小青账" />
+    <h2 class="title">{{ isLogin ? '登录' : '注册' }}小青账</h2>
     <van-form @submit="onSubmit">
       <van-cell-group inset>
         <van-field
@@ -61,6 +62,7 @@ async function onSubmit() {
 
 <style scoped>
 .login { padding: 60px 0; }
-.title { text-align: center; margin-bottom: 24px; color: #07c160; }
+.brand-logo { display: block; width: 76px; height: 76px; margin: 0 auto 12px; }
+.title { text-align: center; margin-bottom: 24px; color: #8ab079; }
 .actions { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 </style>

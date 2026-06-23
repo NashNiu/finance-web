@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="小青账 app icon">
+  <!-- rounded-square plate so the green mascot reads on any background -->
+  <rect width="96" height="96" rx="22" fill="#ffffff"/>
+  <g transform="translate(48 47) scale(0.82) translate(-48 -47)">
+    <!-- ears -->
+    <ellipse cx="19" cy="40" rx="9" ry="13" fill="#9dbf8d" transform="rotate(-28 19 40)"/>
+    <ellipse cx="77" cy="40" rx="9" ry="13" fill="#9dbf8d" transform="rotate(28 77 40)"/>
+    <!-- horns -->
+    <path d="M37 26 C30 20 28 12 33 10 C35 16 40 22 42 26 Z" fill="#ecc35a"/>
+    <path d="M59 26 C66 20 68 12 63 10 C61 16 56 22 54 26 Z" fill="#ecc35a"/>
+    <!-- head -->
+    <circle cx="48" cy="50" r="32" fill="#9dbf8d"/>
+    <!-- eyes -->
+    <circle cx="38" cy="44" r="8" fill="#ffffff"/>
+    <circle cx="58" cy="44" r="8" fill="#ffffff"/>
+    <circle cx="39" cy="45" r="3.6" fill="#33402f"/>
+    <circle cx="57" cy="45" r="3.6" fill="#33402f"/>
+    <!-- muzzle + smile -->
+    <ellipse cx="48" cy="62" rx="17" ry="12" fill="#eef5ea"/>
+    <circle cx="42" cy="60" r="2" fill="#9dbf8d"/>
+    <circle cx="54" cy="60" r="2" fill="#9dbf8d"/>
+    <path d="M42 66 Q48 70 54 66" fill="none" stroke="#7aa86a" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+</svg>
