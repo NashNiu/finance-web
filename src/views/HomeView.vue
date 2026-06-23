@@ -2,6 +2,7 @@
   <div class="home">
     <div class="qz-header">
       <div class="topbar">
+        <img class="topbar__logo" src="/app-icon.svg" alt="" aria-hidden="true" />
         <span class="topbar__title">小青账</span>
         <!-- <div class="topbar__icons">
           <van-icon name="balance-list-o" @click="toast" />
@@ -15,7 +16,7 @@
           <!-- <van-icon name="exchange" size="13" /> -->
         </div>
         <div class="ov__amount-row">
-          <span class="ov__amount">¥{{ masked(summary.expense) }}</span>
+          <span class="ov__amount">{{ (visible ? '¥' : '') + masked(summary.expense) }}</span>
           <van-icon
             :name="visible ? 'eye-o' : 'closed-eye'"
             class="ov__eye"
@@ -96,6 +97,12 @@ watch(() => recordEdit.version, load);
   align-items: center;
   justify-content: center;
   height: 30px;
+}
+.topbar__logo {
+  width: 22px;
+  height: 22px;
+  margin-right: 7px;
+  border-radius: 6px;
 }
 .topbar__title {
   font-size: 17px;
