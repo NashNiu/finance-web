@@ -37,22 +37,29 @@
 
     <div class="qz-section">
       <span class="qz-section__title">近3日账单</span>
-      <span class="qz-section__action">按时间</span>
+      <span class="qz-section__action" role="button" @click="toggleSort">
+        {{ sortBy === 'time' ? '按时间' : '按金额' }}
+      </span>
     </div>
 
-    <div v-for="g in recentDays" :key="g.date" class="group">
-      <div class="qz-day">
-        <span>{{ formatDayLabel(g.date) }}</span>
-        <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+    <template v-if="sortBy === 'time'">
+      <div v-for="g in recentDays" :key="g.date" class="group">
+        <div class="qz-day">
+          <span>{{ formatDayLabel(g.date) }}</span>
+          <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+        </div>
+        <RecordItem v-for="r in g.records" :key="r.id" :record="r" @select="edit" />
       </div>
-      <RecordItem v-for="r in g.records" :key="r.id" :record="r" @select="edit" />
+    </template>
+    <div v-else class="group">
+      <RecordItem v-for="r in recordsByAmount" :key="r.id" :record="r" @select="edit" />
     </div>
     <van-empty v-if="recentDays.length === 0" description="近3日暂无账单" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { showToast } from 'vant';
 import RecordItem from '@/components/RecordItem.vue';
 import { listRecords } from '@/api/records';
@@ -67,6 +74,18 @@ const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0'
 const summary = ref<Summary>({ income: 0, expense: 0, balance: 0 });
 const recentDays = ref<{ date: string; records: FinanceRecord[] }[]>([]);
 const visible = ref(true);
+const sortBy = ref<'time' | 'amount'>('time');
+
+const recordsByAmount = computed(() =>
+  recentDays.value
+    .flatMap((g) => g.records)
+    .slice()
+    .sort((a, b) => Number(b.amount) - Number(a.amount)),
+);
+
+const toggleSort = () => {
+  sortBy.value = sortBy.value === 'time' ? 'amount' : 'time';
+};
 
 const masked = (v: number) => (visible.value ? formatMoney(v) : '****');
 const dayExpense = (rs: FinanceRecord[]) =>
@@ -166,5 +185,9 @@ watch(() => recordEdit.version, load);
 }
 .group {
   margin-top: 4px;
+}
+.qz-section__action {
+  cursor: pointer;
+  user-select: none;
 }
 </style>
