@@ -10,9 +10,10 @@
       <div class="sheet__head">
         <van-icon name="cross" class="sheet__close" @click="$emit('update:show', false)" />
         <span class="sheet__title">{{ parent?.name }}</span>
-        <span class="sheet__add" @click="$emit('add')">
-          <van-icon name="plus" size="13" /> 添加
-        </span>
+        <button type="button" class="sheet__add" @click="$emit('add')">
+          <van-icon name="plus" size="13" />
+          <span>添加</span>
+        </button>
       </div>
 
       <div v-if="children.length" class="sub-grid">
@@ -71,23 +72,38 @@ defineEmits<{
 .sheet__close {
   font-size: 20px;
   color: var(--qz-text-sub);
-  width: 56px;
+  width: 64px;
+  flex-shrink: 0;
 }
 .sheet__title {
+  flex: 1;
+  text-align: center;
   font-size: 16px;
   font-weight: 600;
 }
 .sheet__add {
-  width: 56px;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 2px;
+  justify-content: center;
+  gap: 3px;
+  width: 64px;
+  height: 30px;
   font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
   color: #fff;
   background: var(--qz-green);
-  border-radius: 14px;
-  padding: 4px 10px;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+.sheet__add:active {
+  transform: scale(0.96);
+  opacity: 0.9;
 }
 .sub-grid {
   display: grid;
