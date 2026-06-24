@@ -3,7 +3,7 @@
     <div class="qz-header">
       <div class="topbar">
         <img class="topbar__logo" src="/app-icon.svg" alt="" aria-hidden="true" />
-        <span class="topbar__title">小青账</span>
+        <span class="topbar__title">阿牛记账</span>
         <!-- <div class="topbar__icons">
           <van-icon name="balance-list-o" @click="toast" />
           <van-icon name="records-o" @click="toast" />
