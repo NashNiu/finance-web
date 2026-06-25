@@ -69,16 +69,28 @@
     <!-- Bill detail section -->
     <div class="qz-section">
       <span class="qz-section__title">账单明细</span>
-      <span class="qz-section__action">按时间</span>
+      <span class="qz-section__action" role="button" @click="toggleSort">
+        {{ sortBy === 'time' ? '按时间' : '按金额' }}
+      </span>
     </div>
 
-    <div v-for="g in dayGroups" :key="g.date" class="bills-group">
-      <div class="qz-day">
-        <span>{{ formatDayLabel(g.date) }}</span>
-        <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+    <template v-if="sortBy === 'time'">
+      <div v-for="g in dayGroups" :key="g.date" class="bills-group">
+        <div class="qz-day">
+          <span>{{ formatDayLabel(g.date) }}</span>
+          <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+        </div>
+        <RecordItem
+          v-for="r in g.records"
+          :key="r.id"
+          :record="r"
+          @select="edit"
+        />
       </div>
+    </template>
+    <div v-else class="bills-group">
       <RecordItem
-        v-for="r in g.records"
+        v-for="r in recordsByAmount"
         :key="r.id"
         :record="r"
         @select="edit"
@@ -130,11 +142,20 @@ const daily = ref<DaySpend[]>([]);
 
 // View state
 const viewMode = ref<'expense' | 'income'>('expense');
+const sortBy = ref<'time' | 'amount'>('time');
 const showPicker = ref(false);
 const pickerValue = ref([String(now.getFullYear()), String(now.getMonth() + 1).padStart(2, '0')]);
 
 // Computed
 const dayGroups = computed(() => groupByDay(records.value));
+
+const recordsByAmount = computed(() =>
+  records.value.slice().sort((a, b) => Number(b.amount) - Number(a.amount)),
+);
+
+const toggleSort = () => {
+  sortBy.value = sortBy.value === 'time' ? 'amount' : 'time';
+};
 
 const selectedDay = computed<DaySpend | null>(() => {
   if (!daily.value.length) return null;
@@ -307,5 +328,10 @@ onMounted(load);
 /* Day group */
 .bills-group {
   margin-top: 4px;
+}
+
+.qz-section__action {
+  cursor: pointer;
+  user-select: none;
 }
 </style>
