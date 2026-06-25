@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="qz-header">
       <div class="bills-topbar">
-        <div class="bills-topbar__month" @click="showPicker = true">
-          <span class="bills-topbar__month-text">{{ year }}年{{ monthNum }}月</span>
+        <div class="bills-topbar__month" @click="showPeriod = true">
+          <span class="bills-topbar__month-text">{{ period.label }}</span>
           <van-icon name="arrow-down" size="13" class="bills-topbar__arrow" />
         </div>
         <span class="bills-topbar__title">账单</span>
@@ -23,7 +23,7 @@
             @click="viewMode = 'expense'"
           >
             <span class="bills-option__dot" :class="viewMode === 'expense' ? 'bills-option__dot--filled' : 'bills-option__dot--hollow'"></span>
-            <span class="bills-option__label">月支出</span>
+            <span class="bills-option__label">{{ unitLabel }}支出</span>
             <span class="bills-option__amount qz-amount-expense">¥{{ formatMoney(summary.expense) }}</span>
           </div>
           <div
@@ -32,29 +32,29 @@
             @click="viewMode = 'income'"
           >
             <span class="bills-option__dot" :class="viewMode === 'income' ? 'bills-option__dot--filled' : 'bills-option__dot--hollow'"></span>
-            <span class="bills-option__label">月收入</span>
+            <span class="bills-option__label">{{ unitLabel }}收入</span>
             <span class="bills-option__amount qz-amount-income">¥{{ formatMoney(summary.income) }}</span>
           </div>
         </div>
         <van-icon name="setting-o" class="bills-mode-row__gear" @click="showToast('敬请期待')" />
       </div>
 
-      <!-- Selected day subtitle -->
-      <div class="bills-day-sub" v-if="selectedDay">
-        {{ selectedDay.day }}日
-        支出¥{{ formatMoney(selectedDay.expense) }}
-        收入¥{{ formatMoney(selectedDay.income) }}
+      <!-- Selected bucket subtitle -->
+      <div class="bills-day-sub" v-if="selectedBucket">
+        {{ selectedBucket.label }}
+        支出¥{{ formatMoney(selectedBucket.expense) }}
+        收入¥{{ formatMoney(selectedBucket.income) }}
       </div>
 
       <!-- Bar chart -->
-      <DailyBar :data="daily" />
+      <DailyBar :buckets="buckets" />
     </div>
 
     <!-- Balance row card -->
     <div class="qz-card bills-balance-card">
       <div class="bills-balance-row">
         <span class="bills-balance-row__left">
-          月结余：
+          {{ unitLabel }}结余：
           <span :class="summary.balance < 0 ? 'qz-amount-expense' : 'qz-amount-income'">
             ¥{{ formatMoney(summary.balance) }}
           </span>
@@ -97,18 +97,9 @@
       />
     </div>
 
-    <van-empty v-if="records.length === 0" description="本月暂无账单" />
+    <van-empty v-if="records.length === 0" description="暂无账单" />
 
-    <!-- Month picker popup -->
-    <van-popup v-model:show="showPicker" position="bottom" round>
-      <van-date-picker
-        v-model="pickerValue"
-        :columns-type="['year', 'month']"
-        title="选择月份"
-        @confirm="onPickerConfirm"
-        @cancel="showPicker = false"
-      />
-    </van-popup>
+    <PeriodPicker v-model:show="showPeriod" :period="period" @confirm="onPeriodConfirm" />
   </div>
 </template>
 
@@ -117,36 +108,40 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { showToast } from 'vant';
 import DailyBar from '@/components/DailyBar.vue';
 import RecordItem from '@/components/RecordItem.vue';
+import PeriodPicker from '@/components/PeriodPicker.vue';
 import { listRecords } from '@/api/records';
 import { useRecordEditStore } from '@/stores/recordEdit';
 import { formatMoney, formatDayLabel, groupByDay } from '@/utils/format';
-import { sumMonth, dailySpend, avgDailyExpense } from '@/utils/aggregate';
+import { sumMonth, bucketSpend, avgDailyExpense, type SpendBucket, type MonthSummary } from '@/utils/aggregate';
+import { makePeriod, toQuery, type Period } from '@/utils/period';
 import type { FinanceRecord } from '@/types';
-import type { DaySpend, MonthSummary } from '@/utils/aggregate';
 
 const recordEdit = useRecordEditStore();
 
-// Current month state
+// Period state
 const now = new Date();
-const month = ref(
-  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
-);
-
-const year = computed(() => parseInt(month.value.split('-')[0]));
-const monthNum = computed(() => parseInt(month.value.split('-')[1]));
+const period = ref<Period>(makePeriod('month', now, now));
+const showPeriod = ref(false);
 
 // Data
 const records = ref<FinanceRecord[]>([]);
 const summary = ref<MonthSummary>({ income: 0, expense: 0, balance: 0 });
-const daily = ref<DaySpend[]>([]);
+const buckets = ref<SpendBucket[]>([]);
 
 // View state
 const viewMode = ref<'expense' | 'income'>('expense');
 const sortBy = ref<'time' | 'amount'>('time');
-const showPicker = ref(false);
-const pickerValue = ref([String(now.getFullYear()), String(now.getMonth() + 1).padStart(2, '0')]);
 
 // Computed
+const unitLabel = computed(() =>
+  ({ week: '周', month: '月', year: '年', custom: '' }[period.value.mode]),
+);
+
+const selectedBucket = computed<SpendBucket | null>(() => {
+  if (!buckets.value.length) return null;
+  return buckets.value.find((b) => b.expense > 0) ?? buckets.value[0] ?? null;
+});
+
 const dayGroups = computed(() => groupByDay(records.value));
 
 const recordsByAmount = computed(() =>
@@ -156,13 +151,6 @@ const recordsByAmount = computed(() =>
 const toggleSort = () => {
   sortBy.value = sortBy.value === 'time' ? 'amount' : 'time';
 };
-
-const selectedDay = computed<DaySpend | null>(() => {
-  if (!daily.value.length) return null;
-  // Find first day with expense, else fall back to day 1
-  const withExpense = daily.value.find((d) => d.expense > 0);
-  return withExpense ?? daily.value[0] ?? null;
-});
 
 function dayExpense(rs: FinanceRecord[]): number {
   return rs
@@ -176,21 +164,18 @@ function edit(r: FinanceRecord) {
 
 // Load data
 async function load() {
-  const res = await listRecords({ month: month.value, pageSize: 300 });
+  const { from, to } = toQuery(period.value);
+  const res = await listRecords({ from, to, pageSize: 1000 });
   records.value = res.items;
   summary.value = sumMonth(res.items);
-  daily.value = dailySpend(res.items, year.value, monthNum.value);
+  buckets.value = bucketSpend(res.items, period.value);
 }
 
-// Month picker confirm
-function onPickerConfirm({ selectedValues }: { selectedValues: string[] }) {
-  const [y, m] = selectedValues;
-  month.value = `${y}-${m.padStart(2, '0')}`;
-  pickerValue.value = [y, m.padStart(2, '0')];
-  showPicker.value = false;
+function onPeriodConfirm(p: Period) {
+  period.value = p;
 }
 
-watch(month, load);
+watch(period, load);
 watch(() => recordEdit.version, load);
 onMounted(load);
 </script>

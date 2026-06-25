@@ -3,6 +3,8 @@ import type { FinanceRecord, Paginated, RecordType } from '@/types';
 
 export interface RecordQuery {
   month?: string;
+  from?: string;
+  to?: string;
   type?: RecordType;
   categoryId?: number;
   page?: number;
