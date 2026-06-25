@@ -1,4 +1,5 @@
 import type { FinanceRecord, RecordType } from '@/types';
+import type { Period } from './period';
 
 export interface MonthSummary {
   income: number;
@@ -105,4 +106,58 @@ export function avgDailyExpense(records: FinanceRecord[]): number {
     }
   }
   return days.size > 0 ? expense / days.size : 0;
+}
+
+export interface SpendBucket {
+  key: string;
+  label: string;
+  expense: number;
+  income: number;
+}
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+const dayKey = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+export function bucketSpend(records: FinanceRecord[], period: Period): SpendBucket[] {
+  if (period.mode === 'year') {
+    const y = period.start.getFullYear();
+    const buckets: SpendBucket[] = Array.from({ length: 12 }, (_, i) => ({
+      key: `${y}-${pad2(i + 1)}`,
+      label: `${i + 1}月`,
+      expense: 0,
+      income: 0,
+    }));
+    for (const r of records) {
+      const d = new Date(r.recordDate);
+      if (d.getFullYear() !== y) continue;
+      const b = buckets[d.getMonth()];
+      if (r.type === 'INCOME') b.income += num(r.amount);
+      else b.expense += num(r.amount);
+    }
+    return buckets;
+  }
+
+  const buckets: SpendBucket[] = [];
+  const index = new Map<string, SpendBucket>();
+  for (
+    let d = new Date(period.start);
+    d < period.end;
+    d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)
+  ) {
+    const b: SpendBucket = {
+      key: dayKey(d),
+      label: `${d.getMonth() + 1}月${d.getDate()}日`,
+      expense: 0,
+      income: 0,
+    };
+    buckets.push(b);
+    index.set(b.key, b);
+  }
+  for (const r of records) {
+    const b = index.get(dayKey(new Date(r.recordDate)));
+    if (!b) continue;
+    if (r.type === 'INCOME') b.income += num(r.amount);
+    else b.expense += num(r.amount);
+  }
+  return buckets;
 }
