@@ -138,7 +138,8 @@ const weekList = computed(() => weeksOfYear(selWeekStart.value.getFullYear(), no
 const headSummary = computed(() => {
   if (draftMode.value === 'month') return `${sel.y}年${sel.m}月`;
   if (draftMode.value === 'year') return `${selYear.value}年`;
-  if (draftMode.value === 'week') return makePeriod('week', selWeekStart.value, now.value).label;
+  if (draftMode.value === 'week')
+    return makePeriod('week', selWeekStart.value, now.value).label.replace(/\s*\(.*\)$/, '');
   return makeCustomPeriod(customStart.value, customEnd.value).label;
 });
 
@@ -213,13 +214,16 @@ function confirm() {
 <style scoped>
 .pp { padding: 16px 16px 24px; }
 .pp__head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
 }
-.pp__summary { font-size: 17px; font-weight: 700; white-space: nowrap; }
-.pp__tabs { display: flex; gap: 6px; }
+.pp__summary {
+  flex: 1; min-width: 0; font-size: 16px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pp__tabs { display: flex; gap: 4px; flex-shrink: 0; }
 .pp__tab {
-  font-size: 14px; color: var(--qz-text-sub); padding: 4px 10px; border-radius: 14px;
+  white-space: nowrap; font-size: 13px; color: var(--qz-text-sub);
+  padding: 5px 9px; border-radius: 14px;
 }
 .pp__tab--active { color: #fff; background: var(--qz-text); font-weight: 600; }
 .pp__body { min-height: 200px; }
