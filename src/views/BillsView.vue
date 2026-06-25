@@ -97,7 +97,7 @@
       />
     </div>
 
-    <van-empty v-if="records.length === 0" description="本月暂无账单" />
+    <van-empty v-if="records.length === 0" description="暂无账单" />
 
     <PeriodPicker v-model:show="showPeriod" :period="period" @confirm="onPeriodConfirm" />
   </div>
@@ -175,7 +175,7 @@ function onPeriodConfirm(p: Period) {
   period.value = p;
 }
 
-watch(period, load, { deep: true });
+watch(period, load);
 watch(() => recordEdit.version, load);
 onMounted(load);
 </script>
