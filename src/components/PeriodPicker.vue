@@ -118,7 +118,7 @@ const TABS: { mode: PeriodMode; label: string }[] = [
   { mode: 'custom', label: '自定义' },
 ];
 
-const now = new Date();
+const now = ref(new Date());
 const pad = (n: number) => String(n).padStart(2, '0');
 const fmtYmd = (d: Date) => `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 
@@ -133,16 +133,17 @@ const customStart = ref<Date>(props.period.start);
 const customEnd = ref<Date>(new Date(props.period.end.getFullYear(), props.period.end.getMonth(), props.period.end.getDate() - 1));
 
 const weekBody = ref<HTMLElement>();
-const weekList = computed(() => weeksOfYear(selWeekStart.value.getFullYear(), now));
+const weekList = computed(() => weeksOfYear(selWeekStart.value.getFullYear(), now.value));
 
 const headSummary = computed(() => {
   if (draftMode.value === 'month') return `${sel.y}年${sel.m}月`;
   if (draftMode.value === 'year') return `${selYear.value}年`;
-  if (draftMode.value === 'week') return makePeriod('week', selWeekStart.value, now).label;
+  if (draftMode.value === 'week') return makePeriod('week', selWeekStart.value, now.value).label;
   return makeCustomPeriod(customStart.value, customEnd.value).label;
 });
 
 function init() {
+  now.value = new Date();
   const s = props.period.start;
   draftMode.value = props.period.mode;
   navYear.value = s.getFullYear();
@@ -156,7 +157,7 @@ function init() {
   customEnd.value = new Date(props.period.end.getFullYear(), props.period.end.getMonth(), props.period.end.getDate() - 1);
 }
 
-watch(() => props.show, (v) => { if (v) { init(); if (draftMode.value === 'week') scrollToSelWeek(); } });
+watch(() => props.show, (v) => { if (v) { init(); if (draftMode.value === 'week') scrollToSelWeek(); } }, { immediate: true });
 watch(draftMode, (m) => { if (m === 'week') scrollToSelWeek(); });
 
 async function scrollToSelWeek() {
@@ -165,12 +166,12 @@ async function scrollToSelWeek() {
 }
 
 function pickMonth(y: number, m: number) {
-  if (new Date(y, m - 1, 1) > now) return;
+  if (new Date(y, m - 1, 1) > now.value) return;
   sel.y = y;
   sel.m = m;
 }
 function pickYear(y: number) {
-  if (y > now.getFullYear()) return;
+  if (y > now.value.getFullYear()) return;
   selYear.value = y;
 }
 function pickWeek(key: string, start: Date) {
@@ -197,9 +198,9 @@ function onDateConfirm() {
 
 function confirm() {
   let period: Period;
-  if (draftMode.value === 'week') period = makePeriod('week', selWeekStart.value, now);
-  else if (draftMode.value === 'month') period = makePeriod('month', new Date(sel.y, sel.m - 1, 1), now);
-  else if (draftMode.value === 'year') period = makePeriod('year', new Date(selYear.value, 0, 1), now);
+  if (draftMode.value === 'week') period = makePeriod('week', selWeekStart.value, now.value);
+  else if (draftMode.value === 'month') period = makePeriod('month', new Date(sel.y, sel.m - 1, 1), now.value);
+  else if (draftMode.value === 'year') period = makePeriod('year', new Date(selYear.value, 0, 1), now.value);
   else {
     if (customStart.value > customEnd.value) { showToast('开始时间不能晚于结束时间'); return; }
     period = makeCustomPeriod(customStart.value, customEnd.value);
