@@ -74,30 +74,33 @@
       </span>
     </div>
 
-    <template v-if="sortBy === 'time'">
-      <div v-for="g in dayGroups" :key="g.date" class="bills-group">
-        <div class="qz-day">
-          <span>{{ formatDayLabel(g.date) }}</span>
-          <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+    <AppLoading v-if="loading" />
+    <template v-else>
+      <template v-if="sortBy === 'time'">
+        <div v-for="g in dayGroups" :key="g.date" class="bills-group">
+          <div class="qz-day">
+            <span>{{ formatDayLabel(g.date) }}</span>
+            <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+          </div>
+          <RecordItem
+            v-for="r in g.records"
+            :key="r.id"
+            :record="r"
+            @select="edit"
+          />
         </div>
+      </template>
+      <div v-else class="bills-group">
         <RecordItem
-          v-for="r in g.records"
+          v-for="r in recordsByAmount"
           :key="r.id"
           :record="r"
           @select="edit"
         />
       </div>
-    </template>
-    <div v-else class="bills-group">
-      <RecordItem
-        v-for="r in recordsByAmount"
-        :key="r.id"
-        :record="r"
-        @select="edit"
-      />
-    </div>
 
-    <van-empty v-if="records.length === 0" description="暂无账单" />
+      <van-empty v-if="records.length === 0" description="暂无账单" />
+    </template>
 
     <PeriodPicker v-model:show="showPeriod" :period="period" @confirm="onPeriodConfirm" />
   </div>
@@ -109,6 +112,7 @@ import { showToast } from 'vant';
 import DailyBar from '@/components/DailyBar.vue';
 import RecordItem from '@/components/RecordItem.vue';
 import PeriodPicker from '@/components/PeriodPicker.vue';
+import AppLoading from '@/components/AppLoading.vue';
 import { listRecords } from '@/api/records';
 import { useRecordEditStore } from '@/stores/recordEdit';
 import { formatMoney, formatDayLabel, groupByDay } from '@/utils/format';
@@ -131,6 +135,7 @@ const buckets = ref<SpendBucket[]>([]);
 // View state
 const viewMode = ref<'expense' | 'income'>('expense');
 const sortBy = ref<'time' | 'amount'>('time');
+const loading = ref(true);
 
 // Computed
 const unitLabel = computed(() =>
@@ -164,11 +169,16 @@ function edit(r: FinanceRecord) {
 
 // Load data
 async function load() {
-  const { from, to } = toQuery(period.value);
-  const res = await listRecords({ from, to, pageSize: 1000 });
-  records.value = res.items;
-  summary.value = sumMonth(res.items);
-  buckets.value = bucketSpend(res.items, period.value);
+  loading.value = true;
+  try {
+    const { from, to } = toQuery(period.value);
+    const res = await listRecords({ from, to, pageSize: 1000 });
+    records.value = res.items;
+    summary.value = sumMonth(res.items);
+    buckets.value = bucketSpend(res.items, period.value);
+  } finally {
+    loading.value = false;
+  }
 }
 
 function onPeriodConfirm(p: Period) {

@@ -42,19 +42,22 @@
       </span>
     </div>
 
-    <template v-if="sortBy === 'time'">
-      <div v-for="g in recentDays" :key="g.date" class="group">
-        <div class="qz-day">
-          <span>{{ formatDayLabel(g.date) }}</span>
-          <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+    <AppLoading v-if="loading" />
+    <template v-else>
+      <template v-if="sortBy === 'time'">
+        <div v-for="g in recentDays" :key="g.date" class="group">
+          <div class="qz-day">
+            <span>{{ formatDayLabel(g.date) }}</span>
+            <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+          </div>
+          <RecordItem v-for="r in g.records" :key="r.id" :record="r" @select="edit" />
         </div>
-        <RecordItem v-for="r in g.records" :key="r.id" :record="r" @select="edit" />
+      </template>
+      <div v-else class="group">
+        <RecordItem v-for="r in recordsByAmount" :key="r.id" :record="r" @select="edit" />
       </div>
+      <van-empty v-if="recentDays.length === 0" description="近3日暂无账单" />
     </template>
-    <div v-else class="group">
-      <RecordItem v-for="r in recordsByAmount" :key="r.id" :record="r" @select="edit" />
-    </div>
-    <van-empty v-if="recentDays.length === 0" description="近3日暂无账单" />
   </div>
 </template>
 
@@ -62,6 +65,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { showToast } from 'vant';
 import RecordItem from '@/components/RecordItem.vue';
+import AppLoading from '@/components/AppLoading.vue';
 import { listRecords } from '@/api/records';
 import { getSummary } from '@/api/stats';
 import { useRecordEditStore } from '@/stores/recordEdit';
@@ -75,6 +79,7 @@ const summary = ref<Summary>({ income: 0, expense: 0, balance: 0 });
 const recentDays = ref<{ date: string; records: FinanceRecord[] }[]>([]);
 const visible = ref(true);
 const sortBy = ref<'time' | 'amount'>('time');
+const loading = ref(true);
 
 const recordsByAmount = computed(() =>
   recentDays.value
@@ -97,12 +102,17 @@ function edit(r: FinanceRecord) {
 }
 
 async function load() {
-  const [sum, list] = await Promise.all([
-    getSummary(month),
-    listRecords({ pageSize: 50 }),
-  ]);
-  summary.value = sum;
-  recentDays.value = groupByDay(list.items).slice(0, 3);
+  loading.value = true;
+  try {
+    const [sum, list] = await Promise.all([
+      getSummary(month),
+      listRecords({ pageSize: 50 }),
+    ]);
+    summary.value = sum;
+    recentDays.value = groupByDay(list.items).slice(0, 3);
+  } finally {
+    loading.value = false;
+  }
 }
 
 onMounted(load);
