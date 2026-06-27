@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <van-button class="qz-cta" type="primary" block @click="recordEdit.openNew()">
+    <van-button ref="ctaRef" class="qz-cta" type="primary" block @click="recordEdit.openNew()">
       记一笔
     </van-button>
 
@@ -58,11 +58,25 @@
       </div>
       <van-empty v-if="recentDays.length === 0" description="近3日暂无账单" />
     </template>
+
+    <Teleport to="body">
+      <Transition name="fab">
+        <button
+          v-if="showFab"
+          class="qz-fab"
+          aria-label="记一笔"
+          @click="recordEdit.openNew()"
+        >
+          <van-icon name="plus" />
+        </button>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import { showToast } from 'vant';
 import RecordItem from '@/components/RecordItem.vue';
 import AppLoading from '@/components/AppLoading.vue';
@@ -80,6 +94,11 @@ const recentDays = ref<{ date: string; records: FinanceRecord[] }[]>([]);
 const visible = ref(true);
 const sortBy = ref<'time' | 'amount'>('time');
 const loading = ref(true);
+
+// Floating "记一笔" button shown once the inline CTA scrolls out of view.
+const ctaRef = ref<ComponentPublicInstance | null>(null);
+const showFab = ref(false);
+let observer: IntersectionObserver | null = null;
 
 const recordsByAmount = computed(() =>
   recentDays.value
@@ -115,7 +134,20 @@ async function load() {
   }
 }
 
-onMounted(load);
+onMounted(() => {
+  load();
+  const el = ctaRef.value?.$el as HTMLElement | undefined;
+  if (el && 'IntersectionObserver' in window) {
+    observer = new IntersectionObserver(
+      ([entry]) => {
+        showFab.value = !entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    observer.observe(el);
+  }
+});
+onBeforeUnmount(() => observer?.disconnect());
 watch(() => recordEdit.version, load);
 </script>
 
@@ -199,5 +231,39 @@ watch(() => recordEdit.version, load);
 .qz-section__action {
   cursor: pointer;
   user-select: none;
+}
+
+/* Floating record button, sits above the fixed tabbar. */
+.qz-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 66px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: var(--qz-green-deep);
+  color: #fff;
+  font-size: 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+.qz-fab:active {
+  transform: scale(0.94);
+}
+
+/* Appear / disappear animation. */
+.fab-enter-active,
+.fab-leave-active {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+.fab-enter-from,
+.fab-leave-to {
+  transform: scale(0) translateY(12px);
+  opacity: 0;
 }
 </style>
