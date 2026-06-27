@@ -36,7 +36,7 @@
             <span class="bills-option__amount qz-amount-income">¥{{ formatMoney(summary.income) }}</span>
           </div>
         </div>
-        <van-icon name="setting-o" class="bills-mode-row__gear" @click="showToast('敬请期待')" />
+        <van-icon name="setting-o" class="bills-mode-row__gear" @click="showSettings = true" />
       </div>
 
       <!-- Selected bucket subtitle -->
@@ -46,8 +46,8 @@
         收入¥{{ formatMoney(selectedBucket.income) }}
       </div>
 
-      <!-- Bar chart -->
-      <DailyBar :buckets="buckets" />
+      <!-- Bar / line chart -->
+      <DailyBar :buckets="buckets" :chart-type="chartType" />
     </div>
 
     <!-- Balance row card -->
@@ -103,6 +103,112 @@
     </template>
 
     <PeriodPicker v-model:show="showPeriod" :period="period" @confirm="onPeriodConfirm" />
+
+    <!-- Bills page settings -->
+    <van-popup
+      v-model:show="showSettings"
+      position="bottom"
+      round
+      :style="{ maxHeight: '70%' }"
+    >
+      <div class="settings">
+        <div class="settings__bar">
+          <van-icon name="cross" class="settings__close" @click="showSettings = false" />
+          <span class="settings__title">账单页面设置</span>
+        </div>
+        <div class="settings__group">
+          <div class="settings__group-label">账单页面</div>
+          <div class="settings__card">
+            <div class="settings__row" role="button" @click="showChartType = true">
+              <van-icon name="bar-chart-o" class="settings__row-icon" />
+              <div class="settings__row-main">
+                <div class="settings__row-title">统计图类型</div>
+                <div class="settings__row-desc">账单页面统计图类型</div>
+              </div>
+              <span class="settings__row-value">{{ chartType === 'line' ? '折线' : '柱状' }}</span>
+              <van-icon name="arrow" class="settings__row-arrow" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </van-popup>
+
+    <!-- Chart type chooser -->
+    <van-popup v-model:show="showChartType" position="bottom" round>
+      <div class="settings">
+        <div class="settings__bar">
+          <van-icon name="cross" class="settings__close" @click="showChartType = false" />
+          <span class="settings__title">统计图类型</span>
+        </div>
+        <div class="settings__group">
+          <div
+            class="chart-opt"
+            :class="{ 'chart-opt--active': chartType === 'line' }"
+            role="button"
+            @click="setChartType('line')"
+          >
+            <div class="chart-opt__head">
+              <van-icon name="chart-trending-o" class="chart-opt__icon" />
+              <span class="chart-opt__label">折线</span>
+              <van-icon
+                :name="chartType === 'line' ? 'checked' : 'circle'"
+                class="settings__radio"
+                :class="{ 'settings__radio--on': chartType === 'line' }"
+              />
+            </div>
+            <svg
+              class="chart-opt__preview"
+              :viewBox="`0 0 ${PREVIEW_W} ${PREVIEW_H}`"
+              preserveAspectRatio="none"
+            >
+              <polygon :points="previewArea" fill="rgba(231, 90, 84, 0.1)" />
+              <polyline
+                :points="previewLine"
+                fill="none"
+                stroke="#e75a54"
+                stroke-width="2"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+                vector-effect="non-scaling-stroke"
+              />
+            </svg>
+          </div>
+
+          <div
+            class="chart-opt"
+            :class="{ 'chart-opt--active': chartType === 'bar' }"
+            role="button"
+            @click="setChartType('bar')"
+          >
+            <div class="chart-opt__head">
+              <van-icon name="bar-chart-o" class="chart-opt__icon" />
+              <span class="chart-opt__label">柱状</span>
+              <van-icon
+                :name="chartType === 'bar' ? 'checked' : 'circle'"
+                class="settings__radio"
+                :class="{ 'settings__radio--on': chartType === 'bar' }"
+              />
+            </div>
+            <svg
+              class="chart-opt__preview"
+              :viewBox="`0 0 ${PREVIEW_W} ${PREVIEW_H}`"
+              preserveAspectRatio="none"
+            >
+              <rect
+                v-for="(bar, i) in previewBars"
+                :key="i"
+                :x="bar.x"
+                :y="bar.y"
+                :width="bar.w"
+                :height="bar.h"
+                rx="1"
+                fill="#e75a54"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -136,6 +242,58 @@ const buckets = ref<SpendBucket[]>([]);
 const viewMode = ref<'expense' | 'income'>('expense');
 const sortBy = ref<'time' | 'amount'>('time');
 const loading = ref(true);
+
+// Settings
+const CHART_TYPE_KEY = 'bills.chartType';
+const showSettings = ref(false);
+const showChartType = ref(false);
+const chartType = ref<'bar' | 'line'>(
+  localStorage.getItem(CHART_TYPE_KEY) === 'line' ? 'line' : 'bar',
+);
+
+function setChartType(type: 'bar' | 'line') {
+  chartType.value = type;
+  localStorage.setItem(CHART_TYPE_KEY, type);
+  showChartType.value = false;
+}
+
+// Mini preview charts for the chart-type chooser.
+const PREVIEW_W = 280;
+const PREVIEW_H = 56;
+const PREVIEW_SAMPLE = [4, 9, 5, 13, 7, 4, 10, 6, 3, 8, 5, 11, 6, 4, 7, 3];
+
+const previewValues = computed(() => {
+  const vals = buckets.value.map((b) => b.expense);
+  return vals.some((v) => v > 0) ? vals : PREVIEW_SAMPLE;
+});
+const previewMax = computed(() => Math.max(...previewValues.value, 1));
+
+const previewLine = computed(() => {
+  const vals = previewValues.value;
+  const n = vals.length;
+  if (n === 1) return `0,${PREVIEW_H} ${PREVIEW_W},${PREVIEW_H}`;
+  return vals
+    .map((v, i) => {
+      const x = (i / (n - 1)) * PREVIEW_W;
+      const y = PREVIEW_H - (v / previewMax.value) * (PREVIEW_H - 4);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+});
+const previewArea = computed(
+  () => `0,${PREVIEW_H} ${previewLine.value} ${PREVIEW_W},${PREVIEW_H}`,
+);
+
+const previewBars = computed(() => {
+  const vals = previewValues.value;
+  const n = vals.length;
+  const gap = n > 24 ? 1 : 3;
+  const bw = Math.max((PREVIEW_W - gap * (n - 1)) / n, 1);
+  return vals.map((v, i) => {
+    const h = Math.max((v / previewMax.value) * (PREVIEW_H - 4), 1);
+    return { x: i * (bw + gap), y: PREVIEW_H - h, w: bw, h };
+  });
+});
 
 // Computed
 const unitLabel = computed(() =>
@@ -328,5 +486,160 @@ onMounted(load);
 .qz-section__action {
   cursor: pointer;
   user-select: none;
+}
+
+/* Settings popup */
+.settings {
+  padding: 0 0 calc(20px + env(safe-area-inset-bottom));
+  background: var(--qz-bg);
+}
+
+.settings__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+}
+
+.settings__close {
+  position: absolute;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #eef0ee;
+  color: #6b6f6a;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.settings__title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.settings__group {
+  padding: 4px 12px;
+}
+
+.settings__group-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings__group-label::before {
+  content: '';
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--qz-green);
+}
+
+.settings__card {
+  background: var(--qz-card);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.settings__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.settings__row + .settings__row {
+  border-top: 1px solid #f0f1f0;
+}
+
+.settings__row-icon {
+  font-size: 22px;
+  color: var(--qz-text-sub);
+}
+
+.settings__row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings__row-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.settings__row-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--qz-text-sub);
+}
+
+.settings__row-value {
+  font-size: 14px;
+  color: var(--qz-text-sub);
+}
+
+.settings__row-arrow {
+  color: #c2c5c0;
+}
+
+.settings__row--option .settings__row-title {
+  flex: 1;
+}
+
+.settings__radio {
+  font-size: 22px;
+  color: #c2c5c0;
+}
+
+.settings__radio--on {
+  color: var(--qz-green-deep);
+}
+
+/* Chart-type option card with preview */
+.chart-opt {
+  background: var(--qz-card);
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  padding: 12px 16px 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.chart-opt--active {
+  border-color: var(--qz-green);
+}
+
+.chart-opt__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-opt__icon {
+  font-size: 22px;
+  color: var(--qz-text-sub);
+}
+
+.chart-opt__label {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.chart-opt__preview {
+  display: block;
+  width: 100%;
+  height: 56px;
+  margin-top: 10px;
 }
 </style>
