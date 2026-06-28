@@ -8,7 +8,7 @@
           <van-icon name="arrow-down" size="13" class="bills-topbar__arrow" />
         </div>
         <span class="bills-topbar__title">账单</span>
-        <van-icon name="search" class="bills-topbar__search" @click="showToast('敬请期待')" />
+        <van-icon name="search" class="bills-topbar__search" @click="router.push('/search')" />
       </div>
     </div>
 
@@ -214,7 +214,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { showToast } from 'vant';
+import { useRouter } from 'vue-router';
 import DailyBar from '@/components/DailyBar.vue';
 import RecordItem from '@/components/RecordItem.vue';
 import PeriodPicker from '@/components/PeriodPicker.vue';
@@ -227,6 +227,7 @@ import { makePeriod, toQuery, type Period } from '@/utils/period';
 import type { FinanceRecord } from '@/types';
 
 const recordEdit = useRecordEditStore();
+const router = useRouter();
 
 // Period state
 const now = new Date();
