@@ -10,6 +10,11 @@ const router = createRouter({
     },
     { path: '/', component: () => import('@/views/HomeView.vue') },
     { path: '/bills', component: () => import('@/views/BillsView.vue') },
+    {
+      path: '/search',
+      component: () => import('@/views/SearchView.vue'),
+      meta: { hideTabbar: true },
+    },
     { path: '/reports', component: () => import('@/views/ReportsView.vue') },
     { path: '/me', component: () => import('@/views/MeView.vue') },
     {
