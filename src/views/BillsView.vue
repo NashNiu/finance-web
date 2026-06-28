@@ -1,7 +1,7 @@
 <template>
   <div class="bills">
     <!-- Header -->
-    <div class="qz-header">
+    <div class="qz-header bills-header">
       <div class="bills-topbar">
         <div class="bills-topbar__month" @click="showPeriod = true">
           <span class="bills-topbar__month-text">{{ period.label }}</span>
@@ -349,6 +349,13 @@ onMounted(load);
 </script>
 
 <style scoped>
+/* Keep the green header (period + search) pinned while the list scrolls. */
+.bills-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
 /* Header topbar */
 .bills-topbar {
   position: relative;
