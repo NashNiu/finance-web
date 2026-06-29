@@ -1,7 +1,7 @@
 {
-  "name": "阿牛记账",
-  "short_name": "阿牛记账",
-  "description": "简单好用的记账小工具",
+  "name": "Suixin Ledger 随心账本",
+  "short_name": "Suixin Ledger",
+  "description": "A simple, handy bookkeeping app",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

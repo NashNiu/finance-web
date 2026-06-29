@@ -1,4 +1,4 @@
-# Finance Web
+# Suixin Ledger · 随心账本
 
 **English** | [简体中文](./README.zh-CN.md)
 

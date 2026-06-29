@@ -3,7 +3,7 @@ const login = {
   zh: {
     signIn: '登录',
     signUp: '注册',
-    appName: '小青账',
+    appName: '随心账本',
     username: '用户名',
     password: '密码',
     usernamePlaceholder: '字母数字下划线，3-20位',
@@ -17,7 +17,7 @@ const login = {
   en: {
     signIn: 'Sign in',
     signUp: 'Sign up',
-    appName: 'Qingzhang',
+    appName: 'Suixin Ledger',
     username: 'Username',
     password: 'Password',
     usernamePlaceholder: 'Letters, digits, underscore, 3-20 chars',
