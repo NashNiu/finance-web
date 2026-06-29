@@ -1,7 +1,7 @@
 const home = {
   name: 'home',
   zh: {
-    title: '阿牛记账',
+    title: '随心账本',
     monthExpenseLabel: '本月支出(元)',
     monthIncome: '本月收入',
     monthBalance: '月结余',
@@ -10,7 +10,7 @@ const home = {
     recentEmpty: '近{n}日暂无账单',
   },
   en: {
-    title: 'ANiu Ledger',
+    title: 'Suixin Ledger',
     monthExpenseLabel: 'This month expense (¥)',
     monthIncome: 'Income',
     monthBalance: 'Balance',
