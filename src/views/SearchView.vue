@@ -10,16 +10,16 @@
           v-model="keyword"
           class="search-bar__input"
           type="search"
-          placeholder="支持分类备注金额搜索..."
+          :placeholder="t('search.placeholder')"
           @keyup.enter="onSearch"
         />
-        <button class="search-bar__btn" @click="onSearch">搜索</button>
+        <button class="search-bar__btn" @click="onSearch">{{ t('common.search') }}</button>
       </div>
     </div>
 
     <!-- Search dimension chips -->
     <div class="search-cond">
-      <span class="search-cond__label">条件：</span>
+      <span class="search-cond__label">{{ t('search.conditions') }}</span>
       <span
         v-for="c in conditions"
         :key="c.key"
@@ -28,27 +28,24 @@
         role="button"
         @click="toggleCond(c.key)"
       >
-        {{ c.label }}
+        {{ t(c.label) }}
       </span>
     </div>
 
     <!-- Hint card -->
     <div class="qz-card search-hint">
-      <div class="search-hint__title">提示</div>
+      <div class="search-hint__title">{{ t('search.tip') }}</div>
       <div class="search-hint__body">
         <van-icon name="info-o" class="search-hint__info" />
-        <span>
-          搜索可帮助模糊找到某笔或某批账单，如需按维度统计账单可使用报表页面，
-          搜索关键词为分类、备注、金额~
-        </span>
+        <span>{{ t('search.hint') }}</span>
       </div>
     </div>
 
     <!-- Result section -->
     <div class="qz-section">
-      <span class="qz-section__title">账单明细(共{{ matched.length }}笔)</span>
+      <span class="qz-section__title">{{ t('search.detailCount', { n: matched.length }) }}</span>
       <span class="qz-section__action" role="button" @click="toggleSort">
-        {{ sortBy === 'time' ? '按时间' : '按金额' }}
+        {{ sortBy === 'time' ? t('common.byTime') : t('common.byAmount') }}
       </span>
     </div>
 
@@ -59,7 +56,7 @@
           <div v-for="g in dayGroups" :key="g.date" class="search-group">
             <div class="qz-day">
               <span>{{ formatDayLabel(g.date) }}</span>
-              <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+              <span>{{ t('common.expenseShort') }}:{{ formatMoney(dayExpense(g.records)) }}</span>
             </div>
             <RecordItem v-for="r in g.records" :key="r.id" :record="r" @select="edit" />
           </div>
@@ -68,13 +65,14 @@
           <RecordItem v-for="r in matchedByAmount" :key="r.id" :record="r" @select="edit" />
         </div>
       </template>
-      <van-empty v-else description="未发现账单哦，试着记一笔~" />
+      <van-empty v-else :description="t('search.empty')" />
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import RecordItem from '@/components/RecordItem.vue';
 import AppLoading from '@/components/AppLoading.vue';
@@ -85,6 +83,7 @@ import type { FinanceRecord } from '@/types';
 
 type CondKey = 'category' | 'note' | 'amount';
 
+const { t } = useI18n();
 const router = useRouter();
 const recordEdit = useRecordEditStore();
 
@@ -96,9 +95,9 @@ const loading = ref(false);
 const sortBy = ref<'time' | 'amount'>('time');
 
 const conditions: { key: CondKey; label: string }[] = [
-  { key: 'category', label: '分类' },
-  { key: 'note', label: '备注' },
-  { key: 'amount', label: '金额' },
+  { key: 'category', label: 'search.dimCategory' },
+  { key: 'note', label: 'search.dimNote' },
+  { key: 'amount', label: 'search.dimAmount' },
 ];
 const active = ref<Set<CondKey>>(new Set(['category', 'note', 'amount']));
 

@@ -7,7 +7,7 @@
           <span class="bills-topbar__month-text">{{ period.label }}</span>
           <van-icon name="arrow-down" size="13" class="bills-topbar__arrow" />
         </div>
-        <span class="bills-topbar__title">账单</span>
+        <span class="bills-topbar__title">{{ t('bills.title') }}</span>
         <van-icon name="search" class="bills-topbar__search" @click="router.push('/search')" />
       </div>
     </div>
@@ -23,7 +23,7 @@
             @click="viewMode = 'expense'"
           >
             <span class="bills-option__dot" :class="viewMode === 'expense' ? 'bills-option__dot--filled' : 'bills-option__dot--hollow'"></span>
-            <span class="bills-option__label">{{ unitLabel }}支出</span>
+            <span class="bills-option__label">{{ unitLabel }}{{ t('common.expense') }}</span>
             <span class="bills-option__amount qz-amount-expense">¥{{ formatMoney(summary.expense) }}</span>
           </div>
           <div
@@ -32,7 +32,7 @@
             @click="viewMode = 'income'"
           >
             <span class="bills-option__dot" :class="viewMode === 'income' ? 'bills-option__dot--filled' : 'bills-option__dot--hollow'"></span>
-            <span class="bills-option__label">{{ unitLabel }}收入</span>
+            <span class="bills-option__label">{{ unitLabel }}{{ t('common.income') }}</span>
             <span class="bills-option__amount qz-amount-income">¥{{ formatMoney(summary.income) }}</span>
           </div>
         </div>
@@ -42,8 +42,8 @@
       <!-- Selected bucket subtitle -->
       <div class="bills-day-sub" v-if="selectedBucket">
         {{ selectedBucket.label }}
-        支出¥{{ formatMoney(selectedBucket.expense) }}
-        收入¥{{ formatMoney(selectedBucket.income) }}
+        {{ t('common.expense') }}¥{{ formatMoney(selectedBucket.expense) }}
+        {{ t('common.income') }}¥{{ formatMoney(selectedBucket.income) }}
       </div>
 
       <!-- Bar / line chart -->
@@ -54,13 +54,13 @@
     <div class="qz-card bills-balance-card">
       <div class="bills-balance-row">
         <span class="bills-balance-row__left">
-          {{ unitLabel }}结余：
+          {{ unitLabel }}{{ t('common.balance') }}：
           <span :class="summary.balance < 0 ? 'qz-amount-expense' : 'qz-amount-income'">
             ¥{{ formatMoney(summary.balance) }}
           </span>
         </span>
         <span class="bills-balance-row__right">
-          日均支出：
+          {{ t('bills.avgDailyExpense') }}：
           <span class="qz-amount-expense">¥{{ formatMoney(avgDailyExpense(records)) }}</span>
         </span>
       </div>
@@ -68,9 +68,9 @@
 
     <!-- Bill detail section -->
     <div class="qz-section">
-      <span class="qz-section__title">账单明细</span>
+      <span class="qz-section__title">{{ t('bills.details') }}</span>
       <span class="qz-section__action" role="button" @click="toggleSort">
-        {{ sortBy === 'time' ? '按时间' : '按金额' }}
+        {{ sortBy === 'time' ? t('common.byTime') : t('common.byAmount') }}
       </span>
     </div>
 
@@ -80,7 +80,7 @@
         <div v-for="g in dayGroups" :key="g.date" class="bills-group">
           <div class="qz-day">
             <span>{{ formatDayLabel(g.date) }}</span>
-            <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+            <span>{{ t('common.expenseShort') }}:{{ formatMoney(dayExpense(g.records)) }}</span>
           </div>
           <RecordItem
             v-for="r in g.records"
@@ -99,7 +99,7 @@
         />
       </div>
 
-      <van-empty v-if="records.length === 0" description="暂无账单" />
+      <van-empty v-if="records.length === 0" :description="t('bills.empty')" />
     </template>
 
     <PeriodPicker v-model:show="showPeriod" :period="period" @confirm="onPeriodConfirm" />
@@ -114,18 +114,18 @@
       <div class="settings">
         <div class="settings__bar">
           <van-icon name="cross" class="settings__close" @click="showSettings = false" />
-          <span class="settings__title">账单页面设置</span>
+          <span class="settings__title">{{ t('bills.settingsTitle') }}</span>
         </div>
         <div class="settings__group">
-          <div class="settings__group-label">账单页面</div>
+          <div class="settings__group-label">{{ t('bills.billsPage') }}</div>
           <div class="settings__card">
             <div class="settings__row" role="button" @click="showChartType = true">
               <van-icon name="bar-chart-o" class="settings__row-icon" />
               <div class="settings__row-main">
-                <div class="settings__row-title">统计图类型</div>
-                <div class="settings__row-desc">账单页面统计图类型</div>
+                <div class="settings__row-title">{{ t('bills.chartType') }}</div>
+                <div class="settings__row-desc">{{ t('bills.chartTypeDesc') }}</div>
               </div>
-              <span class="settings__row-value">{{ chartType === 'line' ? '折线' : '柱状' }}</span>
+              <span class="settings__row-value">{{ chartType === 'line' ? t('bills.chartLine') : t('bills.chartBar') }}</span>
               <van-icon name="arrow" class="settings__row-arrow" />
             </div>
           </div>
@@ -138,7 +138,7 @@
       <div class="settings">
         <div class="settings__bar">
           <van-icon name="cross" class="settings__close" @click="showChartType = false" />
-          <span class="settings__title">统计图类型</span>
+          <span class="settings__title">{{ t('bills.chartType') }}</span>
         </div>
         <div class="settings__group">
           <div
@@ -149,7 +149,7 @@
           >
             <div class="chart-opt__head">
               <van-icon name="chart-trending-o" class="chart-opt__icon" />
-              <span class="chart-opt__label">折线</span>
+              <span class="chart-opt__label">{{ t('bills.chartLine') }}</span>
               <van-icon
                 :name="chartType === 'line' ? 'checked' : 'circle'"
                 class="settings__radio"
@@ -182,7 +182,7 @@
           >
             <div class="chart-opt__head">
               <van-icon name="bar-chart-o" class="chart-opt__icon" />
-              <span class="chart-opt__label">柱状</span>
+              <span class="chart-opt__label">{{ t('bills.chartBar') }}</span>
               <van-icon
                 :name="chartType === 'bar' ? 'checked' : 'circle'"
                 class="settings__radio"
@@ -214,6 +214,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import DailyBar from '@/components/DailyBar.vue';
 import RecordItem from '@/components/RecordItem.vue';
@@ -226,6 +227,7 @@ import { sumMonth, bucketSpend, avgDailyExpense, type SpendBucket, type MonthSum
 import { makePeriod, toQuery, type Period } from '@/utils/period';
 import type { FinanceRecord } from '@/types';
 
+const { t } = useI18n();
 const recordEdit = useRecordEditStore();
 const router = useRouter();
 
@@ -298,7 +300,12 @@ const previewBars = computed(() => {
 
 // Computed
 const unitLabel = computed(() =>
-  ({ week: '周', month: '月', year: '年', custom: '' }[period.value.mode]),
+  ({
+    week: t('period.week'),
+    month: t('period.month'),
+    year: t('period.year'),
+    custom: '',
+  }[period.value.mode]),
 );
 
 const selectedBucket = computed<SpendBucket | null>(() => {

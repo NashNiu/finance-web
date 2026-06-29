@@ -1,14 +1,14 @@
 <template>
   <div class="cat-page">
-    <van-nav-bar title="收支分类" left-arrow @click-left="router.back()" />
+    <van-nav-bar :title="t('category.title')" left-arrow @click-left="router.back()" />
 
     <!-- EXPENSE / INCOME tabs -->
     <van-tabs v-model:active="type" color="var(--qz-green)" title-active-color="var(--qz-green-deep)">
-      <van-tab title="支出" name="EXPENSE" />
-      <van-tab title="收入" name="INCOME" />
+      <van-tab :title="t('common.expense')" name="EXPENSE" />
+      <van-tab :title="t('common.income')" name="INCOME" />
     </van-tabs>
 
-    <p class="hint">点一级分类管理其下的二级分类</p>
+    <p class="hint">{{ t('category.hint') }}</p>
 
     <!-- first-level grid -->
     <div class="qz-card cat-card">
@@ -35,7 +35,7 @@
         <!-- add first-level tile -->
         <div class="cat-tile cat-tile--add" @click="openAddFirst">
           <van-icon name="plus" size="24" color="var(--qz-text-sub)" />
-          <span class="cat-tile__name" style="color: var(--qz-text-sub)">新增一级</span>
+          <span class="cat-tile__name" style="color: var(--qz-text-sub)">{{ t('category.addFirstLevel') }}</span>
         </div>
       </div>
     </div>
@@ -64,19 +64,19 @@
     <!-- add first-level dialog -->
     <van-dialog
       v-model:show="showAddFirst"
-      title="新增一级分类"
+      :title="t('category.addFirstLevelTitle')"
       show-cancel-button
       :before-close="onAddFirstClose"
     >
       <div class="add-form">
         <van-field
           v-model="firstName"
-          label="名称"
-          placeholder="请输入分类名称"
+          :label="t('category.name')"
+          :placeholder="t('category.enterName')"
           maxlength="10"
           clearable
         />
-        <div class="add-form__icon-label">选择图标</div>
+        <div class="add-form__icon-label">{{ t('category.chooseIcon') }}</div>
         <div class="add-form__icons">
           <div
             v-for="ic in iconChoices"
@@ -96,6 +96,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { showConfirmDialog, showToast } from 'vant';
 import SubcategorySheet from '@/components/SubcategorySheet.vue';
 import AddCategoryForm from '@/components/AddCategoryForm.vue';
@@ -106,6 +107,7 @@ import { EMOJI_CHOICES } from '@/utils/icon';
 import type { Category, RecordType } from '@/types';
 
 const router = useRouter();
+const { t } = useI18n();
 const catStore = useCategoryStore();
 
 const type = ref<RecordType>('EXPENSE');
@@ -148,7 +150,7 @@ function onSubCreated() {
 
 async function onDeleteSub(subId: number) {
   try {
-    await showConfirmDialog({ message: '删除该分类？' });
+    await showConfirmDialog({ message: t('category.deleteConfirm') });
   } catch {
     return;
   }
@@ -169,7 +171,7 @@ function openAddFirst() {
 async function onAddFirstClose(action: string): Promise<boolean> {
   if (action === 'cancel') return true;
   if (!firstName.value.trim()) {
-    showToast('请输入分类名称');
+    showToast(t('category.enterName'));
     return false;
   }
   try {
@@ -188,7 +190,7 @@ async function onAddFirstClose(action: string): Promise<boolean> {
 
 async function onDeleteFirst(id: number) {
   try {
-    await showConfirmDialog({ message: '删除该一级分类？（需先删除其下二级分类）' });
+    await showConfirmDialog({ message: t('category.deleteFirstConfirm') });
   } catch {
     return;
   }

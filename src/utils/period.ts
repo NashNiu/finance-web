@@ -7,11 +7,21 @@ export interface Period {
   label: string;
 }
 
+import { currentLocale, t } from '@/i18n';
+import { monthDayLabel } from './format';
+
+const EN_MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
 const pad = (n: number) => String(n).padStart(2, '0');
 const atMidnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const addDays = (d: Date, n: number) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-const md = (d: Date) => `${d.getMonth() + 1}月${d.getDate()}日`;
+const md = (d: Date) => monthDayLabel(d.getMonth() + 1, d.getDate());
+const monthLabel = (y: number, m0: number) =>
+  currentLocale() === 'en' ? `${EN_MONTHS[m0]} ${y}` : `${y}年${m0 + 1}月`;
 const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const DAY = 86400000;
 
@@ -33,13 +43,13 @@ export function isoWeek(d: Date): number {
   return 1 + Math.round((date.getTime() - firstThursday.getTime()) / (7 * DAY));
 }
 
-// '本周' | '上周' | '第N周', relative to now.
+// '本周' | '上周' | '第N周' (zh) / 'This week' | 'Last week' | 'Week N' (en).
 export function weekNote(ws: Date, now: Date): string {
   const cur = weekStart(now);
   const diff = Math.round((ws.getTime() - cur.getTime()) / (7 * DAY));
-  if (diff === 0) return '本周';
-  if (diff === -1) return '上周';
-  return `第${isoWeek(ws)}周`;
+  if (diff === 0) return t('period.thisWeek');
+  if (diff === -1) return t('period.lastWeek');
+  return t('period.weekN', { n: isoWeek(ws) });
 }
 
 export function makePeriod(
@@ -55,11 +65,12 @@ export function makePeriod(
   if (mode === 'month') {
     const y = anchor.getFullYear();
     const m = anchor.getMonth();
-    return { mode, start: new Date(y, m, 1), end: new Date(y, m + 1, 1), label: `${y}年${m + 1}月` };
+    return { mode, start: new Date(y, m, 1), end: new Date(y, m + 1, 1), label: monthLabel(y, m) };
   }
   // year
   const y = anchor.getFullYear();
-  return { mode, start: new Date(y, 0, 1), end: new Date(y + 1, 0, 1), label: `${y}年` };
+  const yearLabel = currentLocale() === 'en' ? `${y}` : `${y}年`;
+  return { mode, start: new Date(y, 0, 1), end: new Date(y + 1, 0, 1), label: yearLabel };
 }
 
 export function makeCustomPeriod(start: Date, end: Date): Period {
@@ -68,7 +79,9 @@ export function makeCustomPeriod(start: Date, end: Date): Period {
   const sameYear = s.getFullYear() === lastDay.getFullYear();
   const label = sameYear
     ? `${md(s)}-${md(lastDay)}`
-    : `${s.getFullYear()}年${md(s)}-${lastDay.getFullYear()}年${md(lastDay)}`;
+    : currentLocale() === 'en'
+      ? `${md(s)}, ${s.getFullYear()} - ${md(lastDay)}, ${lastDay.getFullYear()}`
+      : `${s.getFullYear()}年${md(s)}-${lastDay.getFullYear()}年${md(lastDay)}`;
   return { mode: 'custom', start: s, end: addDays(lastDay, 1), label };
 }
 

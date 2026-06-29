@@ -25,14 +25,17 @@
       </svg>
       <span class="app-loading__shadow"></span>
     </div>
-    <span v-if="text" class="app-loading__text">{{ text }}</span>
+    <span v-if="text !== ''" class="app-loading__text">{{ text ?? t('components.loading') }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 withDefaults(defineProps<{ size?: number; text?: string }>(), {
   size: 56,
-  text: '加载中',
 });
 </script>
 

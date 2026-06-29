@@ -1,12 +1,12 @@
 <template>
   <div class="add-cat">
     <div class="add-cat__head">
-      <span class="add-cat__title">添加{{ parentId ? '子' : '' }}分类</span>
+      <span class="add-cat__title">{{ parentId ? t('category.addSubcategory') : t('category.addCategory') }}</span>
       <van-icon name="cross" class="add-cat__close" @click="$emit('cancel')" />
     </div>
 
     <!-- 一级分类 selector -->
-    <div class="field-label">一级分类</div>
+    <div class="field-label">{{ t('category.topLevelCategory') }}</div>
     <div class="chips">
       <span
         v-for="p in firstLevels"
@@ -23,14 +23,14 @@
     <!-- name -->
     <van-field
       v-model="name"
-      label="分类名称"
-      placeholder="请输入分类名称"
+      :label="t('category.categoryName')"
+      :placeholder="t('category.enterName')"
       maxlength="10"
       clearable
     />
 
     <!-- icon grid -->
-    <div class="field-label">选择图标</div>
+    <div class="field-label">{{ t('category.chooseIcon') }}</div>
     <div class="icons">
       <div
         v-for="ic in iconChoices"
@@ -50,13 +50,14 @@
       :loading="saving"
       @click="onSave"
     >
-      保存
+      {{ t('common.save') }}
     </van-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { showToast } from 'vant';
 import CategoryIcon from '@/components/CategoryIcon.vue';
 import { createCategory } from '@/api/categories';
@@ -74,6 +75,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ created: [Category]; cancel: [] }>();
 
+const { t } = useI18n();
 const catStore = useCategoryStore();
 
 const selectedParentId = ref<number | null>(
@@ -86,8 +88,8 @@ const saving = ref(false);
 const iconChoices = EMOJI_CHOICES;
 
 async function onSave() {
-  if (!name.value.trim()) return showToast('请输入分类名称');
-  if (!selectedParentId.value) return showToast('请选择一级分类');
+  if (!name.value.trim()) return showToast(t('category.enterName'));
+  if (!selectedParentId.value) return showToast(t('category.selectTopLevel'));
   saving.value = true;
   try {
     const cat = await createCategory({
@@ -97,7 +99,7 @@ async function onSave() {
       parentId: selectedParentId.value,
     });
     await catStore.load(true);
-    showToast('已添加');
+    showToast(t('category.added'));
     name.value = '';
     emit('created', cat);
   } catch {

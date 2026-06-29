@@ -5,7 +5,7 @@
       <van-cell
         v-for="r in group.records"
         :key="r.id"
-        :title="r.category?.name || '未分类'"
+        :title="r.category?.name || t('common.uncategorized')"
         :label="r.note || ''"
         is-link
         @click="$emit('select', r)"
@@ -20,15 +20,17 @@
         </template>
       </van-cell>
     </div>
-    <van-empty v-if="groups.length === 0" description="本月暂无记录" />
+    <van-empty v-if="groups.length === 0" :description="t('components.noRecordsThisMonth')" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { groupByDay, formatMoney } from '@/utils/format';
 import type { FinanceRecord } from '@/types';
 
+const { t } = useI18n();
 const props = defineProps<{ records: FinanceRecord[] }>();
 defineEmits<{ select: [record: FinanceRecord] }>();
 const groups = computed(() => groupByDay(props.records));

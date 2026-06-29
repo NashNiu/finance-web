@@ -3,7 +3,7 @@
     <div class="qz-header">
       <div class="topbar">
         <img class="topbar__logo" src="/app-icon.svg" alt="" aria-hidden="true" />
-        <span class="topbar__title">阿牛记账</span>
+        <span class="topbar__title">{{ t('home.title') }}</span>
         <!-- <div class="topbar__icons">
           <van-icon name="balance-list-o" @click="toast" />
           <van-icon name="records-o" @click="toast" />
@@ -12,7 +12,7 @@
 
       <div class="ov">
         <div class="ov__label">
-          本月支出(元)
+          {{ t('home.monthExpenseLabel') }}
           <!-- <van-icon name="exchange" size="13" /> -->
         </div>
         <div class="ov__amount-row">
@@ -24,21 +24,21 @@
           />
         </div>
         <div class="ov__sub">
-          <span>本月收入 {{ masked(summary.income) }}</span>
-          <span>月结余 {{ masked(summary.balance) }}</span>
+          <span>{{ t('home.monthIncome') }} {{ masked(summary.income) }}</span>
+          <span>{{ t('home.monthBalance') }} {{ masked(summary.balance) }}</span>
         </div>
         <!-- <div class="dots"><i /><i class="on" /><i /></div> -->
       </div>
     </div>
 
     <van-button ref="ctaRef" class="qz-cta" type="primary" block @click="recordEdit.openNew()">
-      记一笔
+      {{ t('home.addRecord') }}
     </van-button>
 
     <div class="qz-section">
-      <span class="qz-section__title">近3日账单</span>
+      <span class="qz-section__title">{{ t('home.recentBills', { n: 3 }) }}</span>
       <span class="qz-section__action" role="button" @click="toggleSort">
-        {{ sortBy === 'time' ? '按时间' : '按金额' }}
+        {{ sortBy === 'time' ? t('common.byTime') : t('common.byAmount') }}
       </span>
     </div>
 
@@ -48,7 +48,7 @@
         <div v-for="g in recentDays" :key="g.date" class="group">
           <div class="qz-day">
             <span>{{ formatDayLabel(g.date) }}</span>
-            <span>支:{{ formatMoney(dayExpense(g.records)) }}</span>
+            <span>{{ t('common.expenseShort') }}:{{ formatMoney(dayExpense(g.records)) }}</span>
           </div>
           <RecordItem v-for="r in g.records" :key="r.id" :record="r" @select="edit" />
         </div>
@@ -56,7 +56,7 @@
       <div v-else class="group">
         <RecordItem v-for="r in recordsByAmount" :key="r.id" :record="r" @select="edit" />
       </div>
-      <van-empty v-if="recentDays.length === 0" description="近3日暂无账单" />
+      <van-empty v-if="recentDays.length === 0" :description="t('home.recentEmpty', { n: 3 })" />
     </template>
 
     <Teleport to="body">
@@ -64,7 +64,7 @@
         <button
           v-if="showFab"
           class="qz-fab"
-          aria-label="记一笔"
+          :aria-label="t('home.addRecord')"
           @click="recordEdit.openNew()"
         >
           <van-icon name="plus" />
@@ -78,6 +78,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { showToast } from 'vant';
+import { useI18n } from 'vue-i18n';
 import RecordItem from '@/components/RecordItem.vue';
 import AppLoading from '@/components/AppLoading.vue';
 import { listRecords } from '@/api/records';
@@ -86,6 +87,7 @@ import { useRecordEditStore } from '@/stores/recordEdit';
 import { formatMoney, formatDayLabel, groupByDay } from '@/utils/format';
 import type { FinanceRecord, Summary } from '@/types';
 
+const { t } = useI18n();
 const recordEdit = useRecordEditStore();
 const now = new Date();
 const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -114,7 +116,7 @@ const toggleSort = () => {
 const masked = (v: number) => (visible.value ? formatMoney(v) : '****');
 const dayExpense = (rs: FinanceRecord[]) =>
   rs.filter((r) => r.type === 'EXPENSE').reduce((s, r) => s + Number(r.amount), 0);
-const toast = () => showToast('敬请期待');
+const toast = () => showToast(t('common.comingSoon'));
 
 function edit(r: FinanceRecord) {
   recordEdit.openDetail(r);

@@ -4,7 +4,7 @@
       :show="true"
       theme="custom"
       extra-key="."
-      close-button-text="完成"
+      :close-button-text="t('record.done')"
       @input="onInput"
       @delete="onDelete"
       @close="$emit('done')"
@@ -13,6 +13,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 const props = defineProps<{ modelValue: string }>();
 const emit = defineEmits<{ 'update:modelValue': [v: string]; done: [] }>();
 

@@ -2,10 +2,10 @@
   <div class="detail">
     <div class="detail__head">
       <van-icon name="cross" class="detail__close" @click="$emit('close')" />
-      <span class="detail__title">账单详情</span>
+      <span class="detail__title">{{ t('record.detailTitle') }}</span>
       <div class="detail__actions">
-        <span class="act act--edit" @click="$emit('edit')">编辑</span>
-        <span class="act act--del" @click="onDelete">删除</span>
+        <span class="act act--edit" @click="$emit('edit')">{{ t('common.edit') }}</span>
+        <span class="act act--del" @click="onDelete">{{ t('common.delete') }}</span>
       </div>
     </div>
 
@@ -17,41 +17,44 @@
     </div>
 
     <van-cell-group inset class="detail__cells">
-      <van-cell title="分类">
+      <van-cell :title="t('record.category')">
         <template #value>
           <span class="cat-val">
             <CategoryIcon :icon="record.category?.icon" :size="18" />
-            {{ record.category?.name || '未分类' }}
+            {{ record.category?.name || t('common.uncategorized') }}
           </span>
         </template>
       </van-cell>
-      <van-cell title="类型" :value="record.type === 'INCOME' ? '收入' : '支出'" />
-      <van-cell title="日期" :value="toDateKey(record.recordDate)" />
-      <van-cell title="时间" :value="formatTime(record.recordDate)" />
-      <van-cell title="备注" :value="record.note || '无'" />
-      <van-cell title="账本" value="个人" />
+      <van-cell :title="t('record.type')" :value="record.type === 'INCOME' ? t('common.income') : t('common.expense')" />
+      <van-cell :title="t('record.date')" :value="toDateKey(record.recordDate)" />
+      <van-cell :title="t('record.time')" :value="formatTime(record.recordDate)" />
+      <van-cell :title="t('record.note')" :value="record.note || t('record.empty')" />
+      <van-cell :title="t('record.ledger')" :value="t('common.personal')" />
     </van-cell-group>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { showConfirmDialog, showToast } from 'vant';
 import CategoryIcon from '@/components/CategoryIcon.vue';
 import { deleteRecord } from '@/api/records';
 import { formatMoney, formatTime, toDateKey } from '@/utils/format';
 import type { FinanceRecord } from '@/types';
 
+const { t } = useI18n();
+
 const props = defineProps<{ record: FinanceRecord }>();
 const emit = defineEmits<{ close: []; edit: []; deleted: [] }>();
 
 async function onDelete() {
   try {
-    await showConfirmDialog({ title: '删除', message: '确定删除这条记录？' });
+    await showConfirmDialog({ title: t('common.deleteTitle'), message: t('common.confirmDeleteRecord') });
   } catch {
     return; // cancelled
   }
   await deleteRecord(props.record.id);
-  showToast('已删除');
+  showToast(t('common.deleted'));
   emit('deleted');
 }
 </script>

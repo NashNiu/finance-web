@@ -4,8 +4,11 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import * as echarts from 'echarts';
 import type { CategoryBreakdownItem } from '@/utils/aggregate';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   data: CategoryBreakdownItem[];
@@ -55,7 +58,7 @@ function buildOption(): echarts.EChartsOption {
         left: 'center',
         top: '50%',
         style: {
-          text: '轻点切换',
+          text: t('reports.tapToSwitch'),
           textAlign: 'center',
           fill: '#9a9c9f',
           fontSize: 11,
