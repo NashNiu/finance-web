@@ -6,19 +6,19 @@
         <span class="pp__summary">{{ headSummary }}</span>
         <div class="pp__tabs">
           <span
-            v-for="t in TABS"
-            :key="t.mode"
+            v-for="tab in TABS"
+            :key="tab.mode"
             class="pp__tab"
-            :class="{ 'pp__tab--active': draftMode === t.mode }"
-            @click="draftMode = t.mode"
-          >{{ t.label }}</span>
+            :class="{ 'pp__tab--active': draftMode === tab.mode }"
+            @click="draftMode = tab.mode"
+          >{{ tab.label }}</span>
         </div>
       </div>
 
       <!-- 月账单 -->
       <div v-if="draftMode === 'month'" class="pp__body">
         <div class="pp__nav">
-          <span class="pp__nav-title">{{ navYear }}年</span>
+          <span class="pp__nav-title">{{ t('components.yearOnly', { y: navYear }) }}</span>
           <div class="pp__nav-arrows">
             <van-icon name="arrow-up" @click="navYear--" />
             <van-icon name="arrow-down" @click="navYear++" />
@@ -34,7 +34,7 @@
               'pp__cell--future': new Date(navYear, m - 1, 1) > now,
             }"
             @click="pickMonth(navYear, m)"
-          >{{ m }}月</span>
+          >{{ t('components.monthOnly', { m }) }}</span>
         </div>
       </div>
 
@@ -52,7 +52,7 @@
       <!-- 年账单 -->
       <div v-else-if="draftMode === 'year'" class="pp__body">
         <div class="pp__nav">
-          <span class="pp__nav-title">{{ decadeStart }}年-{{ decadeStart + 11 }}年</span>
+          <span class="pp__nav-title">{{ t('components.decadeRange', { start: decadeStart, end: decadeStart + 11 }) }}</span>
           <div class="pp__nav-arrows">
             <van-icon name="arrow-up" @click="decadeStart -= 12" />
             <van-icon name="arrow-down" @click="decadeStart += 12" />
@@ -68,32 +68,32 @@
               'pp__cell--future': decadeStart + i - 1 > now.getFullYear(),
             }"
             @click="pickYear(decadeStart + i - 1)"
-          >{{ decadeStart + i - 1 }}年</span>
+          >{{ t('components.yearOnly', { y: decadeStart + i - 1 }) }}</span>
         </div>
       </div>
 
       <!-- 自定义 -->
       <div v-else class="pp__body">
         <div class="pp__field" @click="openDate('start')">
-          <span class="pp__field-label">开始时间</span>
+          <span class="pp__field-label">{{ t('components.startDate') }}</span>
           <span class="pp__field-value">{{ fmtYmd(customStart) }}<van-icon name="arrow" /></span>
         </div>
         <div class="pp__field" @click="openDate('end')">
-          <span class="pp__field-label">结束时间</span>
+          <span class="pp__field-label">{{ t('components.endDate') }}</span>
           <span class="pp__field-value">{{ fmtYmd(customEnd) }}<van-icon name="arrow" /></span>
         </div>
       </div>
 
       <div class="pp__footer">
-        <button class="pp__btn pp__btn--cancel" @click="$emit('update:show', false)">取消</button>
-        <button class="pp__btn pp__btn--ok" @click="confirm">确定</button>
+        <button class="pp__btn pp__btn--cancel" @click="$emit('update:show', false)">{{ t('common.cancel') }}</button>
+        <button class="pp__btn pp__btn--ok" @click="confirm">{{ t('common.confirm') }}</button>
       </div>
     </div>
 
     <van-popup v-model:show="showDate" position="bottom" round teleport="body">
       <van-date-picker
         v-model="dateValue"
-        :title="dateTarget === 'start' ? '开始时间' : '结束时间'"
+        :title="dateTarget === 'start' ? t('components.startDate') : t('components.endDate')"
         @confirm="onDateConfirm"
         @cancel="showDate = false"
       />
@@ -103,24 +103,27 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { showToast } from 'vant';
 import {
   makePeriod, makeCustomPeriod, weeksOfYear, type Period, type PeriodMode,
 } from '@/utils/period';
 
+const { t } = useI18n();
+
 const props = defineProps<{ show: boolean; period: Period }>();
 const emit = defineEmits<{ 'update:show': [boolean]; confirm: [Period] }>();
 
-const TABS: { mode: PeriodMode; label: string }[] = [
-  { mode: 'week', label: '周账单' },
-  { mode: 'month', label: '月账单' },
-  { mode: 'year', label: '年账单' },
-  { mode: 'custom', label: '自定义' },
-];
+const TABS = computed<{ mode: PeriodMode; label: string }[]>(() => [
+  { mode: 'week', label: t('components.weekBill') },
+  { mode: 'month', label: t('components.monthBill') },
+  { mode: 'year', label: t('components.yearBill') },
+  { mode: 'custom', label: t('period.custom') },
+]);
 
 const now = ref(new Date());
 const pad = (n: number) => String(n).padStart(2, '0');
-const fmtYmd = (d: Date) => `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+const fmtYmd = (d: Date) => t('components.ymd', { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() });
 
 const draftMode = ref<PeriodMode>(props.period.mode);
 const navYear = ref(props.period.start.getFullYear());
@@ -136,8 +139,8 @@ const weekBody = ref<HTMLElement>();
 const weekList = computed(() => weeksOfYear(selWeekStart.value.getFullYear(), now.value));
 
 const headSummary = computed(() => {
-  if (draftMode.value === 'month') return `${sel.y}年${sel.m}月`;
-  if (draftMode.value === 'year') return `${selYear.value}年`;
+  if (draftMode.value === 'month') return t('components.ym', { y: sel.y, m: sel.m });
+  if (draftMode.value === 'year') return t('components.yearOnly', { y: selYear.value });
   if (draftMode.value === 'week')
     return makePeriod('week', selWeekStart.value, now.value).label.replace(/\s*\(.*\)$/, '');
   return makeCustomPeriod(customStart.value, customEnd.value).label;
@@ -203,7 +206,7 @@ function confirm() {
   else if (draftMode.value === 'month') period = makePeriod('month', new Date(sel.y, sel.m - 1, 1), now.value);
   else if (draftMode.value === 'year') period = makePeriod('year', new Date(selYear.value, 0, 1), now.value);
   else {
-    if (customStart.value > customEnd.value) { showToast('开始时间不能晚于结束时间'); return; }
+    if (customStart.value > customEnd.value) { showToast(t('components.startAfterEnd')); return; }
     period = makeCustomPeriod(customStart.value, customEnd.value);
   }
   emit('confirm', period);

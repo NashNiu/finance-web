@@ -6,142 +6,166 @@
         <div class="me-avatar">
           <van-icon name="smile-o" size="28" color="#4a4c4f" />
         </div>
-        <span class="me-username">{{ auth.user?.username || '未登录' }}</span>
+        <span class="me-username">{{ auth.user?.username || t('me.notLoggedIn') }}</span>
         <van-icon
           name="setting-o"
           size="22"
           color="#3c4a38"
           class="me-gear"
-          @click="showToast('敬请期待')"
+          @click="toast"
         />
       </div>
     </div>
 
     <!-- 常用功能 -->
     <div class="qz-section">
-      <span class="qz-section__title">常用功能</span>
+      <span class="qz-section__title">{{ t('me.common') }}</span>
     </div>
     <div class="qz-card me-group-card">
       <div class="me-grid">
         <div
           v-for="tile in commonTiles"
-          :key="tile.text"
+          :key="tile.key"
           class="me-tile"
           @click="tile.action()"
         >
           <van-icon :name="tile.icon" size="26" color="#4a4c4f" />
-          <span class="me-tile__label">{{ tile.text }}</span>
+          <span class="me-tile__label">{{ t('me.' + tile.key) }}</span>
         </div>
       </div>
     </div>
 
     <!-- 账单/资产 -->
     <div class="qz-section">
-      <span class="qz-section__title">账单/资产</span>
+      <span class="qz-section__title">{{ t('me.billsAssets') }}</span>
     </div>
     <div class="qz-card me-group-card">
       <div class="me-grid">
         <div
           v-for="tile in billTiles"
-          :key="tile.text"
+          :key="tile.key"
           class="me-tile"
           @click="tile.action()"
         >
           <van-icon :name="tile.icon" size="26" color="#4a4c4f" />
-          <span class="me-tile__label">{{ tile.text }}</span>
+          <span class="me-tile__label">{{ t('me.' + tile.key) }}</span>
         </div>
       </div>
     </div>
 
     <!-- 偏好 -->
     <div class="qz-section">
-      <span class="qz-section__title">偏好</span>
+      <span class="qz-section__title">{{ t('me.preferences') }}</span>
     </div>
     <div class="qz-card me-group-card">
       <div class="me-grid">
         <div
           v-for="tile in prefTiles"
-          :key="tile.text"
+          :key="tile.key"
           class="me-tile"
           @click="tile.action()"
         >
           <van-icon :name="tile.icon" size="26" color="#4a4c4f" />
-          <span class="me-tile__label">{{ tile.text }}</span>
+          <span class="me-tile__label">{{ t('me.' + tile.key) }}</span>
         </div>
       </div>
     </div>
 
     <!-- 其他 -->
     <div class="qz-section">
-      <span class="qz-section__title">其他</span>
+      <span class="qz-section__title">{{ t('me.others') }}</span>
     </div>
     <div class="qz-card" style="padding: 0; overflow: hidden;">
       <van-cell
         v-for="item in otherItems"
-        :key="item.text"
-        :title="item.text"
+        :key="item.key"
+        :title="t('me.' + item.key)"
         :icon="item.icon"
         is-link
-        @click="showToast('敬请期待')"
+        @click="toast"
       />
     </div>
 
     <!-- 退出登录 -->
     <div class="me-logout">
-      <van-button block round plain type="danger" @click="onLogout">退出登录</van-button>
+      <van-button block round plain type="danger" @click="onLogout">{{ t('me.logout') }}</van-button>
     </div>
+
+    <!-- Language picker -->
+    <van-action-sheet
+      v-model:show="showLang"
+      :actions="langActions"
+      :title="t('me.languageTitle')"
+      :cancel-text="t('common.cancel')"
+      close-on-click-action
+      @select="onSelectLang"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { showToast } from 'vant';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { fetchMe } from '@/api/auth';
+import { setLocale, currentLocale, type AppLocale } from '@/i18n';
 
 const auth = useAuthStore();
 const router = useRouter();
+const { t } = useI18n();
 
-const toast = () => showToast('敬请期待');
+const toast = () => showToast(t('common.comingSoon'));
 
 interface Tile {
-  text: string;
+  key: string;
   icon: string;
   action: () => void;
 }
 
+// Language switcher
+const showLang = ref(false);
+const langActions = computed(() => [
+  { name: '中文', value: 'zh-CN' as AppLocale, color: currentLocale() === 'zh-CN' ? '#4e8a3a' : undefined },
+  { name: 'English', value: 'en' as AppLocale, color: currentLocale() === 'en' ? '#4e8a3a' : undefined },
+]);
+function onSelectLang(action: { value: AppLocale }) {
+  setLocale(action.value);
+}
+
 const commonTiles: Tile[] = [
-  { text: '收支分类', icon: 'label-o', action: () => router.push('/categories') },
-  { text: '多账本', icon: 'balance-list-o', action: toast },
-  { text: '预算设置', icon: 'balance-o', action: toast },
-  { text: '存钱', icon: 'gold-coin-o', action: toast },
-  { text: '购物清单', icon: 'shopping-cart-o', action: toast },
-  { text: '标签', icon: 'label-o', action: toast },
-  { text: '汇率', icon: 'exchange', action: toast },
-  { text: '小工具', icon: 'apps-o', action: toast },
+  { key: 'categories', icon: 'label-o', action: () => router.push('/categories') },
+  { key: 'multiBook', icon: 'balance-list-o', action: toast },
+  { key: 'budget', icon: 'balance-o', action: toast },
+  { key: 'saving', icon: 'gold-coin-o', action: toast },
+  { key: 'shoppingList', icon: 'shopping-cart-o', action: toast },
+  { key: 'tags', icon: 'label-o', action: toast },
+  { key: 'rate', icon: 'exchange', action: toast },
+  { key: 'widgets', icon: 'apps-o', action: toast },
 ];
 
 const billTiles: Tile[] = [
-  { text: '账单管理', icon: 'records', action: toast },
-  { text: '定时记账', icon: 'clock-o', action: toast },
-  { text: '账单报告', icon: 'chart-trending-o', action: toast },
-  { text: '资产', icon: 'card', action: toast },
-  { text: '外卖订单', icon: 'shopping-cart-o', action: toast },
-  { text: '物品管理', icon: 'bag-o', action: toast },
-  { text: '订阅管理', icon: 'vip-card-o', action: toast },
+  { key: 'billManage', icon: 'records', action: toast },
+  { key: 'scheduled', icon: 'clock-o', action: toast },
+  { key: 'billReport', icon: 'chart-trending-o', action: toast },
+  { key: 'assets', icon: 'card', action: toast },
+  { key: 'takeoutOrders', icon: 'shopping-cart-o', action: toast },
+  { key: 'itemManage', icon: 'bag-o', action: toast },
+  { key: 'subscriptions', icon: 'vip-card-o', action: toast },
 ];
 
 const prefTiles: Tile[] = [
-  { text: '记账偏好', icon: 'setting-o', action: toast },
-  { text: '个性化', icon: 'brush-o', action: toast },
-  { text: '快捷指令', icon: 'apps-o', action: toast },
+  { key: 'recordPref', icon: 'setting-o', action: toast },
+  { key: 'personalize', icon: 'brush-o', action: toast },
+  { key: 'shortcuts', icon: 'apps-o', action: toast },
+  { key: 'language', icon: 'font-o', action: () => (showLang.value = true) },
 ];
 
 const otherItems = [
-  { text: '帮助', icon: 'question-o' },
-  { text: '联系客服', icon: 'service-o' },
-  { text: '活动', icon: 'gift-o' },
+  { key: 'help', icon: 'question-o' },
+  { key: 'contact', icon: 'service-o' },
+  { key: 'activity', icon: 'gift-o' },
 ];
 
 async function onLogout() {

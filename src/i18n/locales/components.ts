@@ -1,0 +1,37 @@
+const components = {
+  name: 'components',
+  zh: {
+    noRecordsThisMonth: '本月暂无记录',
+    tooltipExpense: '{axisValue} 支出 ¥{value}',
+    loading: '加载中',
+    weekBill: '周账单',
+    monthBill: '月账单',
+    yearBill: '年账单',
+    ymd: '{y}年{m}月{d}日',
+    ym: '{y}年{m}月',
+    yearOnly: '{y}年',
+    monthOnly: '{m}月',
+    decadeRange: '{start}年-{end}年',
+    startDate: '开始时间',
+    endDate: '结束时间',
+    startAfterEnd: '开始时间不能晚于结束时间',
+  },
+  en: {
+    noRecordsThisMonth: 'No records this month',
+    tooltipExpense: '{axisValue} Expense ¥{value}',
+    loading: 'Loading',
+    weekBill: 'Week',
+    monthBill: 'Month',
+    yearBill: 'Year',
+    ymd: '{y}-{m}-{d}',
+    ym: '{m}/{y}',
+    yearOnly: '{y}',
+    monthOnly: 'Month {m}',
+    decadeRange: '{start}-{end}',
+    startDate: 'Start date',
+    endDate: 'End date',
+    startAfterEnd: 'Start date cannot be later than end date',
+  },
+};
+
+export default components;

@@ -4,8 +4,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import * as echarts from 'echarts';
 import type { SpendBucket } from '@/utils/aggregate';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{ buckets: SpendBucket[]; chartType?: 'bar' | 'line' }>(),
@@ -39,7 +42,7 @@ function render() {
       grid: { left: 6, right: 6, top: 10, bottom: 20 },
       tooltip: {
         trigger: 'axis',
-        formatter: (p: any) => `${p[0].axisValue} 支出 ¥${p[0].data}`,
+        formatter: (p: any) => t('components.tooltipExpense', { axisValue: p[0].axisValue, value: p[0].data }),
       },
       xAxis: {
         type: 'category',

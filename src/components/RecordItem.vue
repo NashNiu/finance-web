@@ -19,22 +19,22 @@
         <div :class="record.type === 'INCOME' ? 'qz-amount-income' : 'qz-amount-expense'">
           {{ record.type === 'INCOME' ? '+' : '-' }}{{ formatMoney(record.amount) }}
         </div>
-        <div class="ri__ledger">个人</div>
+        <div class="ri__ledger">{{ t('common.personal') }}</div>
       </div>
     </div>
 
     <!-- swipe-left reveals edit / delete -->
     <template #right>
       <div class="swipe-actions">
-        <div class="swipe-act swipe-act--edit" @click="onEdit">编辑</div>
-        <div class="swipe-act swipe-act--del" @click="onDelete">删除</div>
+        <div class="swipe-act swipe-act--edit" @click="onEdit">{{ t('common.edit') }}</div>
+        <div class="swipe-act swipe-act--del" @click="onDelete">{{ t('common.delete') }}</div>
       </div>
     </template>
 
     <!-- opposite swipe: listened, no action yet -->
     <template #left>
       <div class="swipe-actions">
-        <div class="swipe-act swipe-act--reserved" @click="cellRef?.close('cell')">迁移</div>
+        <div class="swipe-act swipe-act--reserved" @click="cellRef?.close('cell')">{{ t('common.migrate') }}</div>
       </div>
     </template>
   </van-swipe-cell>
@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { showConfirmDialog, showToast, type SwipeCellInstance } from 'vant';
 import CategoryIcon from '@/components/CategoryIcon.vue';
 import { deleteRecord } from '@/api/records';
@@ -53,6 +54,7 @@ import type { FinanceRecord } from '@/types';
 const props = defineProps<{ record: FinanceRecord }>();
 const emit = defineEmits<{ select: [record: FinanceRecord] }>();
 
+const { t } = useI18n();
 const recordEdit = useRecordEditStore();
 const cellRef = ref<SwipeCellInstance>();
 
@@ -89,12 +91,12 @@ async function onDelete() {
   // dialog opens (otherwise it would swallow the dialog's confirm tap)
   cellRef.value?.close('cell');
   try {
-    await showConfirmDialog({ title: '删除', message: '确定删除这条记录？' });
+    await showConfirmDialog({ title: t('common.deleteTitle'), message: t('common.confirmDeleteRecord') });
   } catch {
     return;
   }
   await deleteRecord(props.record.id);
-  showToast('已删除');
+  showToast(t('common.deleted'));
   recordEdit.notifyChanged();
 }
 </script>

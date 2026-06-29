@@ -3,7 +3,7 @@
     <!-- header -->
     <div class="editor__head">
       <van-icon name="cross" class="editor__close" @click="$emit('close')" />
-      <span class="editor__title">{{ isEdit ? '编辑' : '记一笔' }}</span>
+      <span class="editor__title">{{ isEdit ? t('common.edit') : t('record.addRecord') }}</span>
       <van-icon
         v-if="isEdit"
         name="delete-o"
@@ -14,8 +14,8 @@
     </div>
 
     <van-tabs v-model:active="type" @change="onTypeChange" class="editor__tabs">
-      <van-tab title="支出" name="EXPENSE" />
-      <van-tab title="收入" name="INCOME" />
+      <van-tab :title="t('common.expense')" name="EXPENSE" />
+      <van-tab :title="t('common.income')" name="INCOME" />
     </van-tabs>
 
     <!-- scrollable: category grid -->
@@ -31,7 +31,7 @@
     <!-- fixed bottom input dock: selection + note/date/amount + keypad -->
     <div class="editor__dock">
       <div v-if="selectedName" class="dock__picked">
-        已选：<b>{{ pickedFirstLevelName }}</b>
+        {{ t('record.selectedPrefix') }}<b>{{ pickedFirstLevelName }}</b>
         <template v-if="pickedFirstLevelName !== selectedName"> / {{ selectedName }}</template>
       </div>
 
@@ -40,7 +40,7 @@
           v-model="note"
           class="dock__note"
           :border="false"
-          placeholder="点此添加备注"
+          :placeholder="t('record.notePlaceholder')"
         />
         <div class="dock__date" @click="openDateTime">
           <van-icon name="calendar-o" size="15" />
@@ -59,8 +59,8 @@
 
     <van-popup v-model:show="showDate" position="bottom" teleport="body">
       <van-picker-group
-        :tabs="['日期', '时间']"
-        title="选择日期时间"
+        :tabs="[t('record.date'), t('record.time')]"
+        :title="t('record.pickDateTime')"
         @confirm="onDateTimeConfirm"
         @cancel="showDate = false"
       >
@@ -92,6 +92,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { showToast, showConfirmDialog } from 'vant';
 import CategoryGrid from '@/components/CategoryGrid.vue';
 import SubcategorySheet from '@/components/SubcategorySheet.vue';
@@ -104,6 +105,8 @@ import type { Category, RecordType } from '@/types';
 
 const props = defineProps<{ recordId: number | null }>();
 const emit = defineEmits<{ close: []; saved: []; deleted: [] }>();
+
+const { t } = useI18n();
 
 const catStore = useCategoryStore();
 
@@ -134,7 +137,7 @@ const dpTime = ref<string[]>(recordTime.value.split(':'));
 
 const dateLabel = computed(() => {
   const [, m, d] = recordDate.value.split('-');
-  return `${Number(m)}月${Number(d)}日`;
+  return t('record.monthDay', { m: Number(m), d: Number(d) });
 });
 
 function openDateTime() {
@@ -194,7 +197,7 @@ function onAddCreated(cat: Category) {
 
 async function onDeleteSub(subId: number) {
   try {
-    await showConfirmDialog({ message: '删除该分类？' });
+    await showConfirmDialog({ message: t('record.confirmDeleteCategory') });
   } catch {
     return;
   }
@@ -214,9 +217,9 @@ function onDateTimeConfirm() {
 }
 
 async function onSave() {
-  if (!categoryId.value) return showToast('请选择分类');
+  if (!categoryId.value) return showToast(t('record.selectCategory'));
   const amt = parseFloat(amount.value);
-  if (!amt || amt <= 0) return showToast('请输入金额');
+  if (!amt || amt <= 0) return showToast(t('record.enterAmount'));
   const payload = {
     categoryId: categoryId.value,
     type: type.value,
@@ -226,14 +229,14 @@ async function onSave() {
   };
   if (isEdit.value) await updateRecord(props.recordId!, payload);
   else await createRecord(payload);
-  showToast('已保存');
+  showToast(t('record.saved'));
   emit('saved');
 }
 
 async function onDelete() {
-  await showConfirmDialog({ title: '删除', message: '确定删除这条记录？' });
+  await showConfirmDialog({ title: t('common.deleteTitle'), message: t('common.confirmDeleteRecord') });
   await deleteRecord(props.recordId!);
-  showToast('已删除');
+  showToast(t('common.deleted'));
   emit('deleted');
 }
 

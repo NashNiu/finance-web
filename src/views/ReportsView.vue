@@ -10,25 +10,25 @@
               class="qz-toggle__item"
               :class="{ 'qz-toggle__item--active': mode === 'report' }"
               @click="mode = 'report'"
-            >报表</span>
+            >{{ t('reports.title') }}</span>
             <span
               class="qz-toggle__item"
               :class="{ 'qz-toggle__item--active': mode === 'calendar' }"
               @click="mode = 'calendar'"
-            >日历</span>
+            >{{ t('reports.calendar') }}</span>
           </div>
         </div>
         <!-- right icon -->
-        <van-icon name="like-o" class="header-icon-right" @click="showToast('收藏')" />
+        <van-icon name="like-o" class="header-icon-right" @click="showToast(t('reports.favorite'))" />
       </div>
 
       <!-- month selector row -->
       <div class="header-row header-row--month">
         <div class="month-selector" @click="showMonthPicker = true">
-          <span class="month-label">{{ year }}年{{ monthNum }}月</span>
+          <span class="month-label">{{ monthHeader }}</span>
           <van-icon name="arrow-down" class="month-arrow" />
         </div>
-        <span class="filter-btn" @click="showToast('筛选')">筛选</span>
+        <span class="filter-btn" @click="showToast(t('common.filter'))">{{ t('common.filter') }}</span>
       </div>
     </div>
 
@@ -45,7 +45,7 @@
             @click="type = 'EXPENSE'"
           >
             <span class="type-dot" :class="{ 'type-dot--active': type === 'EXPENSE' }" />
-            <span class="type-option__label">月支出</span>
+            <span class="type-option__label">{{ t('reports.monthExpense') }}</span>
             <span class="type-option__amount qz-amount-expense">
               ¥{{ formatMoney(summary.expense) }}
             </span>
@@ -61,45 +61,45 @@
               class="type-dot"
               :class="{ 'type-dot--active': type === 'INCOME', 'type-dot--income': type === 'INCOME' }"
             />
-            <span class="type-option__label">月收入</span>
+            <span class="type-option__label">{{ t('reports.monthIncome') }}</span>
             <span class="type-option__amount qz-amount-income">
               ¥{{ formatMoney(summary.income) }}
             </span>
           </div>
 
           <!-- Other (disabled) -->
-          <div class="type-option type-option--disabled" @click="showToast('暂不支持')">
+          <div class="type-option type-option--disabled" @click="showToast(t('reports.notSupported'))">
             <span class="type-dot" />
-            <span class="type-option__label">其他</span>
+            <span class="type-option__label">{{ t('reports.other') }}</span>
             <span class="type-option__amount">¥0.00</span>
           </div>
 
           <!-- Gear icon -->
-          <van-icon name="setting-o" class="type-gear" @click="showToast('设置')" />
+          <van-icon name="setting-o" class="type-gear" @click="showToast(t('reports.settings'))" />
         </div>
 
         <!-- Donut chart -->
         <CategoryDonut
           :data="breakdown"
-          :center-title="type === 'EXPENSE' ? '支出大类' : '收入大类'"
+          :center-title="type === 'EXPENSE' ? t('reports.expenseCategory') : t('reports.incomeCategory')"
         />
 
         <!-- Sub-toggle row: 切换小类 / 环形·面积 -->
         <div class="chart-ctrl-row">
-          <span class="chart-ctrl-left" @click="showToast('切换小类')">
-            切换小类
+          <span class="chart-ctrl-left" @click="showToast(t('reports.switchSub'))">
+            {{ t('reports.switchSub') }}
             <van-icon name="replay" class="chart-ctrl-icon" />
           </span>
           <div class="qz-toggle chart-view-toggle">
-            <span class="qz-toggle__item qz-toggle__item--active">环形</span>
-            <span class="qz-toggle__item" @click="showToast('面积图')">面积</span>
+            <span class="qz-toggle__item qz-toggle__item--active">{{ t('reports.ring') }}</span>
+            <span class="qz-toggle__item" @click="showToast(t('reports.areaChart'))">{{ t('reports.area') }}</span>
           </div>
         </div>
       </div>
 
       <!-- Breakdown list -->
       <div class="breakdown-list">
-        <van-empty v-if="breakdown.length === 0" description="暂无数据" />
+        <van-empty v-if="breakdown.length === 0" :description="t('reports.noData')" />
         <div
           v-for="item in breakdown"
           :key="item.categoryId"
@@ -129,7 +129,7 @@
             <span :class="item.type === 'EXPENSE' ? 'qz-amount-expense' : 'qz-amount-income'">
               ¥{{ formatMoney(item.amount) }}
             </span>
-            <span class="brow__count">{{ item.count }}笔</span>
+            <span class="brow__count">{{ t('reports.countUnit', { n: item.count }) }}</span>
           </div>
         </div>
       </div>
@@ -147,12 +147,12 @@
             class="cal-tab"
             :class="{ 'cal-tab--active': calTab === tab.key }"
             @click="calTab = tab.key as CalTab"
-          >{{ tab.label }}</span>
+          >{{ t(tab.labelKey) }}</span>
         </div>
 
         <!-- Weekday headers -->
         <div class="cal-weekdays">
-          <span v-for="w in WEEKDAYS" :key="w" class="cal-wd">{{ w }}</span>
+          <span v-for="w in WEEKDAYS" :key="w" class="cal-wd">{{ t(w) }}</span>
         </div>
 
         <!-- Calendar grid -->
@@ -185,21 +185,21 @@
 
       <!-- Summary card -->
       <div class="qz-card summary-card">
-        <span class="qz-amount-expense">月支出: ¥{{ formatMoney(summary.expense) }}</span>
-        <span class="qz-amount-expense">日均支出: ¥{{ formatMoney(avgDailyExpense(records)) }}</span>
+        <span class="qz-amount-expense">{{ t('reports.monthExpense') }}: ¥{{ formatMoney(summary.expense) }}</span>
+        <span class="qz-amount-expense">{{ t('reports.avgDailyExpense') }}: ¥{{ formatMoney(avgDailyExpense(records)) }}</span>
       </div>
 
       <!-- Selected-day bill section -->
       <div class="qz-section">
         <span class="qz-section__title">
-          {{ formatDayLabel(selectedDate) }}账单
-          <span class="qz-amount-expense"> 支出¥{{ formatMoney(selectedDayExpense) }}</span>
+          {{ formatDayLabel(selectedDate) }}{{ t('reports.billSuffix') }}
+          <span class="qz-amount-expense"> {{ t('common.expense') }}¥{{ formatMoney(selectedDayExpense) }}</span>
         </span>
-        <span class="qz-section__action" @click="recordEdit.openNew()">记一笔</span>
+        <span class="qz-section__action" @click="recordEdit.openNew()">{{ t('reports.addRecord') }}</span>
       </div>
 
       <div class="day-records-wrap">
-        <van-empty v-if="selectedDayRecords.length === 0" description="暂无记录" />
+        <van-empty v-if="selectedDayRecords.length === 0" :description="t('reports.noRecords')" />
         <RecordItem
           v-for="r in selectedDayRecords"
           :key="r.id"
@@ -214,7 +214,7 @@
       <van-date-picker
         v-model="pickerValue"
         :columns-type="['year', 'month']"
-        title="选择月份"
+        :title="t('reports.pickMonth')"
         @confirm="onMonthConfirm"
         @cancel="showMonthPicker = false"
       />
@@ -224,6 +224,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { showToast } from 'vant';
 
 import { listRecords } from '@/api/records';
@@ -241,6 +242,13 @@ import type { FinanceRecord, RecordType } from '@/types';
 
 import CategoryDonut from '@/components/CategoryDonut.vue';
 import RecordItem from '@/components/RecordItem.vue';
+
+const { t, locale } = useI18n();
+
+const EN_MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
 
 // ── record editor popup ──────────────────────────────────────────────────────
 const recordEdit = useRecordEditStore();
@@ -277,6 +285,13 @@ const pickerValue = ref<string[]>([
 const year = computed(() => Number(month.value.split('-')[0]));
 const monthNum = computed(() => Number(month.value.split('-')[1]));
 
+// Locale-aware month header: "2026年6月" (zh) / "Jun 2026" (en).
+const monthHeader = computed(() =>
+  locale.value === 'en'
+    ? `${EN_MONTHS[monthNum.value - 1]} ${year.value}`
+    : `${year.value}年${monthNum.value}月`,
+);
+
 // ── data ────────────────────────────────────────────────────────────────────
 const records = ref<FinanceRecord[]>([]);
 
@@ -299,13 +314,21 @@ const daySpends = computed<DaySpend[]>(() =>
 );
 
 // ── calendar helpers ─────────────────────────────────────────────────────────
-const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+const WEEKDAYS = [
+  'reports.mon',
+  'reports.tue',
+  'reports.wed',
+  'reports.thu',
+  'reports.fri',
+  'reports.sat',
+  'reports.sun',
+];
 
 const CAL_TABS = [
-  { key: 'expense', label: '支出' },
-  { key: 'income', label: '收入' },
-  { key: 'net', label: '收支' },
-  { key: 'balance', label: '结余' },
+  { key: 'expense', labelKey: 'common.expense' },
+  { key: 'income', labelKey: 'common.income' },
+  { key: 'net', labelKey: 'reports.net' },
+  { key: 'balance', labelKey: 'common.balance' },
 ] as const;
 
 // Leading blank cells for Monday-first grid

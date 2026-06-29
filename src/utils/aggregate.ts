@@ -1,5 +1,14 @@
 import type { FinanceRecord, RecordType } from '@/types';
 import type { Period } from './period';
+import { currentLocale, t } from '@/i18n';
+import { monthDayLabel } from './format';
+
+const EN_MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+const monthShortLabel = (m1to12: number) =>
+  currentLocale() === 'en' ? EN_MONTHS[m1to12 - 1] : `${m1to12}月`;
 
 export interface MonthSummary {
   income: number;
@@ -81,7 +90,7 @@ export function categoryBreakdown(
     } else {
       map.set(r.categoryId, {
         categoryId: r.categoryId,
-        name: r.category?.name || '未分类',
+        name: r.category?.name || t('common.uncategorized'),
         icon: r.category?.icon || 'records',
         type,
         amount: amt,
@@ -123,7 +132,7 @@ export function bucketSpend(records: FinanceRecord[], period: Period): SpendBuck
     const y = period.start.getFullYear();
     const buckets: SpendBucket[] = Array.from({ length: 12 }, (_, i) => ({
       key: `${y}-${pad2(i + 1)}`,
-      label: `${i + 1}月`,
+      label: monthShortLabel(i + 1),
       expense: 0,
       income: 0,
     }));
@@ -146,7 +155,7 @@ export function bucketSpend(records: FinanceRecord[], period: Period): SpendBuck
   ) {
     const b: SpendBucket = {
       key: dayKey(d),
-      label: `${d.getMonth() + 1}月${d.getDate()}日`,
+      label: monthDayLabel(d.getMonth() + 1, d.getDate()),
       expense: 0,
       income: 0,
     };

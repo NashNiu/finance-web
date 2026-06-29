@@ -12,7 +12,7 @@
         <span class="sheet__title">{{ parent?.name }}</span>
         <button type="button" class="sheet__add" @click="$emit('add')">
           <van-icon name="plus" size="13" />
-          <span>添加</span>
+          <span>{{ t('category.add') }}</span>
         </button>
       </div>
 
@@ -36,14 +36,17 @@
         </div>
       </div>
 
-      <van-empty v-else description="暂无二级分类，点右上角添加" />
+      <van-empty v-else :description="t('category.emptySub')" />
     </div>
   </van-popup>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import CategoryIcon from '@/components/CategoryIcon.vue';
 import type { Category } from '@/types';
+
+const { t } = useI18n();
 
 defineProps<{
   show: boolean;
