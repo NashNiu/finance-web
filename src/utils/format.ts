@@ -22,16 +22,26 @@ export function formatMoney(value: number | string): string {
   });
 }
 
-// "2026-06-15T..." or Date -> "2026-06-15" (local date part of ISO)
+// recordDate is a wall-clock instant pinned as UTC (e.g. "2026-06-15T16:47:00.000Z").
+// Read its calendar components verbatim from the ISO string so the displayed day
+// and time never shift with the viewer's timezone.
+// "2026-06-15T16:47:00.000Z" -> "2026-06-15"
 export function toDateKey(input: string): string {
+  if (typeof input === 'string' && input.length >= 10 && input[4] === '-') {
+    return input.slice(0, 10);
+  }
+  // Fallback for non-ISO inputs: read UTC components (values are stored as UTC).
   const d = new Date(input);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
 }
 
-// ISO timestamp -> "HH:MM" (local time), used for the record-row time label.
+// "2026-06-15T16:47:00.000Z" -> "16:47"
 export function formatTime(input: string): string {
+  if (typeof input === 'string' && input.length >= 16 && input[10] === 'T') {
+    return input.slice(11, 16);
+  }
   const d = new Date(input);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
 }
 
 // "2026-06-15" -> "6月15日 今天" (zh) / "Jun 15 Today" (en).

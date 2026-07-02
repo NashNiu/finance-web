@@ -63,7 +63,8 @@ export function dailySpend(
     income: 0,
   }));
   for (const r of records) {
-    const d = new Date(r.recordDate).getDate();
+    // Wall-clock day of month from the ISO string (values are pinned as UTC).
+    const d = Number(r.recordDate.slice(8, 10));
     if (d >= 1 && d <= n) {
       if (r.type === 'INCOME') out[d - 1].income += num(r.amount);
       else out[d - 1].expense += num(r.amount);
@@ -137,9 +138,10 @@ export function bucketSpend(records: FinanceRecord[], period: Period): SpendBuck
       income: 0,
     }));
     for (const r of records) {
-      const d = new Date(r.recordDate);
-      if (d.getFullYear() !== y) continue;
-      const b = buckets[d.getMonth()];
+      // Read the wall-clock year/month from the ISO string (values are pinned
+      // as UTC) so records don't shift buckets across a timezone offset.
+      if (Number(r.recordDate.slice(0, 4)) !== y) continue;
+      const b = buckets[Number(r.recordDate.slice(5, 7)) - 1];
       if (r.type === 'INCOME') b.income += num(r.amount);
       else b.expense += num(r.amount);
     }
@@ -163,7 +165,9 @@ export function bucketSpend(records: FinanceRecord[], period: Period): SpendBuck
     index.set(b.key, b);
   }
   for (const r of records) {
-    const b = index.get(dayKey(new Date(r.recordDate)));
+    // Match on the record's wall-clock day (ISO date part), consistent with
+    // the bucket keys, so evening records aren't pushed to the next day.
+    const b = index.get(r.recordDate.slice(0, 10));
     if (!b) continue;
     if (r.type === 'INCOME') b.income += num(r.amount);
     else b.expense += num(r.amount);
