@@ -156,7 +156,12 @@ async function onDelete() {
   height: 100%;
 }
 .swipe-act {
-  height: 100%;
+  /* Bleed 1px above and below so the button fully covers the row edges; the
+     cell's overflow:hidden clips the excess. Prevents a 1px sub-pixel hairline
+     of the red delete background showing at the row's bottom on high-DPR (retina)
+     screens, where a plain height:100% panel rounds to a half-pixel seam. */
+  height: calc(100% + 2px);
+  margin: -1px 0;
   display: flex;
   align-items: center;
   padding: 0 20px;

@@ -225,7 +225,9 @@ async function onSave() {
     type: type.value,
     amount: amt,
     note: note.value,
-    recordDate: `${recordDate.value}T${recordTime.value}:00`,
+    // Send the picked wall-clock pinned as UTC ("...Z") so storage/display is
+    // timezone-independent and does not depend on the server's timezone.
+    recordDate: `${recordDate.value}T${recordTime.value}:00.000Z`,
   };
   if (isEdit.value) await updateRecord(props.recordId!, payload);
   else await createRecord(payload);
@@ -251,9 +253,10 @@ async function loadRecord() {
   selectedFirstLevelId.value = cat?.parentId ?? rec.categoryId;
   amount.value = String(Number(rec.amount));
   note.value = rec.note || '';
-  const d = new Date(rec.recordDate);
-  recordDate.value = localDate(d);
-  recordTime.value = localTime(d);
+  // rec.recordDate is a wall-clock instant pinned as UTC — read its components
+  // straight from the ISO string, not via local timezone conversion.
+  recordDate.value = rec.recordDate.slice(0, 10);
+  recordTime.value = rec.recordDate.slice(11, 16);
 }
 
 onMounted(loadRecord);
